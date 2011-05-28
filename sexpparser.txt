@@ -1,0 +1,44 @@
+Grammar description.
+
+Top-level grammar:
+  start ::= sexp        
+  sexp ::= e | atom | list
+  list ::= "(" {sexp}* ")"
+  or
+  list_elt = sexp | sexp list_elt
+  list :: ="(" list_elt ")"
+  
+Low-level grammar:
+  
+  atom = number | string | symbol
+ 
+  number = integer-number | floating-point-number
+
+  floating-point-number ::= [sign] {digit}* decimal-point {digit}* [exponent]
+                        | [sign] {digit}+ [decimal-point {digit}*] exponent
+  sign ::= "+" | "-"
+  decimal-point ::= "."
+  digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+  exponent ::= exponent-marker [sign] {digit}+
+  exponent-marker ::= "e" | "E"
+
+  integer-number ::= [sign]{digit}+
+
+  space ::= " " | "\n" | "\r" "\t"
+  punct = "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | ","
+        | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "["
+        | "\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
+  escape = "\"
+  double-quote = """
+  escaped-double-quote = escape double-quote
+  # not formal :)
+  alpha ::= a-zA-Z
+  printable ::= digit | punct | alpha
+  string ::= double-quote {printable|space|escaped-double-quote}* double-quote
+
+  symbol ::= symbol-initial {symbol-constituent}*
+        | peculiar-symbol
+  symbol-initial ::= alpha | "!" | "$" | "%" | "&" | "*" | "/" | ":" | "<"
+        | "=" | ">" | "?" | "^" |  "_" | "~"
+  symbol-constituent ::= symbol-initial | digit | "+" | "-" | "." | "@"
+  peculiar-symbol ::= "+" | "-" | "..."
