@@ -1,19 +1,98 @@
-Grammar description.
+1. Grammar description.
 
-Top-level grammar:
-  start ::= sexp        
+1.1 Top-level grammar G
   sexp ::= e | atom | list
   list ::= "(" {sexp}* ")"
-  or
-  list_elt = sexp | sexp list_elt
-  list :: ="(" list_elt ")"
+  or (same)
+  sexp ::= e | atom | list    
+  list_contents = sexp | sexp list_contents
+  list :: ="(" list_contents ")"
+
+1.2 Remove epsilon-production from the grammar
+1.2.1 Productions generating epsilon: sexp, list_contents, list
+ start from list, alternatives w/o epsilon-production
+  list ::= "(" ")" | "(" list_contents ")"
+ now constider list_elt:
+  list_contents ::= sexp | sexp list_contents
+ and finally sexp:
+  sexp ::= atom | list
+ Therefore grammar G1 w/o epsilon-productions is
+
+  sexp ::= atom | list
+  list_contents ::= sexp | sexp list_contents
+  list ::= "(" ")" | "(" list_contents ")"
   
-Low-level grammar:
+1.3 Remove left-recursion  
+  Grammar G1 doesn't contain left recursions(rules like A->Aa)
+
+1.4 Table for predictive (LL) analysis
+
+1.4.1 Rename grammar for simplicty
+  Lets write again grammar, rename terminal and nonterminal symbols for
+  simplicity. Terminals: {a,b,c}. Nonterminals: {S,E,L}
+1.  S -> a | L
+2.  E -> S|SE
+3.  L -> bc | bEc
+
+1.4.2 Build function FIRST
+  Lets build function FIRST for grammar G1, considering
+  FIRST(terminal X) = X,
+  FIRST(nonterminal X) = {first terminals derived from X}:
   
+  FIRST(a)   = a
+  FIRST(b)   = b
+  FIRST(c)   = c
+  FIRST(S)   = {a,b}
+  FIRST(E)   = {a,b}
+  FIRST(L)   = {b}
+  FIRST(SE)  = {a,b}
+  FIRST(bEc) = {b}
+  FIRST(bc)  = {b}
+
+1.4.3 Build function FOLLOW  
+  Lets build funciton FOLLOW(X) defined for nonterminals, considering $
+  as a end of the token stream($ will be always in the end of the FOLLOW):
+  
+  FOLLOW(S) = {c,$}
+  FOLLOW(E) = {c,$}
+  FOLLOW(L) = {c,$}
+
+1.4.4 Build the table for predictive(LL) analysis
+  Expanded grammar:
+  1.  S -> a
+  2.  S -> L
+  3.  E -> S
+  4.  E -> SE
+  5   L -> bc
+  6.  L -> bEc
+
+  Rules to build a table:
+  For every rule like A -> alpha, for every terminal a from FIRST(alpha) add
+  rule A -> alpha to the cell M[A,a]
+
+  +-----+-----+-----+-----+-----+
+  |     |a    |b    |c    |$    |
+  +-----+-----+-----+-----+-----+
+  |S    |1    |2    |     |     |
+  +-----+-----+-----+-----+-----+
+  |E    |3,4  |3,4  |     |     |
+  +-----+-----+-----+-----+-----+
+  |L    |     |5,6  |     |     |
+  +-----+-----+-----+-----+-----+
+
+  since some cells in the table constis of 2 rules we cannot use LL parser for our
+  grammar.
+  
+  
+2. Low-level grammar
+
+2.1 Atom
   atom = number | string | symbol
- 
+
+2.2 Number  
   number = integer-number | floating-point-number
 
+2.2.1 Floating point number  
   floating-point-number ::= [sign] {digit}* decimal-point {digit}* [exponent]
                         | [sign] {digit}+ [decimal-point {digit}*] exponent
   sign ::= "+" | "-"
@@ -22,7 +101,10 @@ Low-level grammar:
   exponent ::= exponent-marker [sign] {digit}+
   exponent-marker ::= "e" | "E"
 
+2.2.2 Integer number  
   integer-number ::= [sign]{digit}+
+
+2.3 String(quoted string)
 
   space ::= " " | "\n" | "\r" "\t"
   punct = "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | ","
@@ -36,6 +118,7 @@ Low-level grammar:
   printable ::= digit | punct | alpha
   string ::= double-quote {printable|space|escaped-double-quote}* double-quote
 
+2.4 Symbol (unquoted string without whitespaces)  
   symbol ::= symbol-initial {symbol-constituent}*
         | peculiar-symbol
   symbol-initial ::= alpha | "!" | "$" | "%" | "&" | "*" | "/" | ":" | "<"
