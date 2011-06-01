@@ -1,6 +1,6 @@
 (defparameter *punct* 'p)
 (defparameter *epslilon* '$)
-(defparameter *terminals* (list'a 'b 'id '+ '*))
+(defparameter *terminals* (list '\( '\) 'id '+ '*))
 (defparameter *nonterminals* (list 'E1 'E 'T 'F))
 (defparameter *grammar*
   (list 
@@ -9,7 +9,7 @@
    (list 'E 'T)                ;; E -> T
    (list 'T (list 'T '* 'F))   ;; T -> T*F
    (list 'T 'F)                ;; T -> F
-   (list 'F (list 'a 'E 'b))   ;; F -> aEb
+   (list 'F (list '\( 'E '\)))   ;; F -> [E]
    (list 'F 'id)))             ;; F -> id
 
 (defparameter *I0* (list (list 'E1 
@@ -53,44 +53,48 @@ do the actual work for right-side of the rule"
                (find snd *nonterminals* :test #'equal))
           (nonterminal-for-closure (rest production))))))
 
-;; returns a list of all rules with nonterminal as a left part
+
 (defun find-all-productions (nonterminal)
+  "Returns a list of all rules with nonterminal as a left part"
   (when (find nonterminal *nonterminals*)
     (remove-if-not
      (lambda (x)
        (eq (first x) nonterminal))
      *grammar*)))
 
-;; determine if the rule is not epsilon-rule
 (defun production-p (rule)
+  "Determine if the rule is not epsilon-rule"
   (let ((production (second rule)))
     (not
      (and (atom production)
           (eq production *epslilon*)))))
 
-;; construct rule for the closure - add punct at the first position
-;; before nonterminal
 (defun rule-for-closure (rule)
+  "Construct rule for the closure - add punct at the first position
+before nonterminal"
   (let ((nonterminal (first rule))
         (production (second rule)))
     (if (listp production)
         (cons nonterminal (list (cons *punct* production)))
         (cons nonterminal (list (list *punct* production))))))
 
-;; construct all closure rules for given rule with punct
 (defun closure-rules-for-closure-rule (rule)
-  (mapcar #'rule-for-closure (find-all-productions (nonterminal-from-rule-for-closure rule))))
+  "Construct all closure rules for given rule with punct"
+  (mapcar #'rule-for-closure
+          (find-all-productions
+           (nonterminal-from-rule-for-closure rule))))
 
-;; add rules to the closure(I) if they are not already there
+
 (defun add-closure-rules-to-closure (closure-I rules)
+  "Add rules to the closure(I) if they are not already there"
   (dolist (X rules)
     (when (not
            (member X closure-I :test 'equal))
       (setf closure-I (push-back X closure-I))))
   closure-I)
     
-;; construct closure array for the given set of rules with punct
 (defun closure (I)
+  "Construct closure array for the given set of rules with punct"
   (let ((s (length I)))
     (dolist (rule I)
       (let ((rules (closure-rules-for-closure-rule rule)))
@@ -99,12 +103,12 @@ do the actual work for right-side of the rule"
         I
         (closure I))))
 
-;; If the rule contains the punct, move punct to the next position
-;; like A -> .B becomes A -> B.
-;; if rule is like A -> B.
-;; then no modifaction 
-;; Also if no punct found just returns rule
 (defun move-punct-to-right (rule)
+  "If the rule contains the punct, move punct to the next position
+like A -> .B becomes A -> B.
+if rule is like A -> B.
+then no modifaction 
+Also if no punct found just returns rule"
   (let* ((left-nonterminal (first rule))
         (right-production (second rule))
         (found nil)
@@ -126,8 +130,34 @@ do the actual work for right-side of the rule"
         rule)))
         
 
-;; create a closure for the initial items list
-;; then move puncts for every rule in this closure
-;; and produce the closure of all puncts
-             
+(defun items(I)
+  "Create a closure for the initial items list
+then move puncts for every rule in this closure
+and produce the closure of all puncts until nothing to add"
+  (let* ((C (closure I)))
+    (make-closure-rules-for-items (length C) C)))
+
+(defun make-closure-rules-for-items (prev-size C)
+  "helper function for adding items to items list
+used to iterate through all closures and to stop
+iteration when nothing to add"
+  (let* ((C1
+          (add-closure-rules-to-closure
+           C (rules-from-closure-with-moved-punct C)))
+         (new-size (length C1)))
+    (if (= new-size prev-size)
+        C1
+        (make-closure-rules-for-items new-size C1))))
+
+(defun rules-from-closure-with-moved-punct (C)
+  "Move punct to one position to the right for all rules;
+and create closure for all such new rules"
+  (dolist (R C)
+    (let* ((moved-punct-rule (move-punct-to-right R))
+           (new-closure (add-closure-rules-to-closure
+                         C
+                         (list moved-punct-rule)))
+           (closure-moved (closure new-closure)))
+      (setf C (add-closure-rules-to-closure C closure-moved))))
+  C)
 
