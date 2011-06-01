@@ -141,6 +141,7 @@ and produce the closure of all puncts until nothing to add"
   "helper function for adding items to items list
 used to iterate through all closures and to stop
 iteration when nothing to add"
+  (format t "called with size ~d~%" prev-size)
   (let* ((C1
           (add-closure-rules-to-closure
            C (rules-from-closure-with-moved-punct C)))
@@ -161,3 +162,24 @@ and create closure for all such new rules"
       (setf C (add-closure-rules-to-closure C closure-moved))))
   C)
 
+
+(defun goto (I X)
+  (let ((goto-list nil)
+        (found nil)
+        (result-list nil))
+    (dolist (R I)
+      (dolist (A (second R))
+        (if (eq A *punct*)
+          (setf found t)
+          (when found
+            (setf found nil)
+            (when (eq A X)
+              (setf goto-list (push-back R goto-list)))))))
+    (when goto-list
+      (dolist (R goto-list)
+        (setf result-list
+              (append result-list (closure (list (move-punct-to-right R))))))
+      result-list)))
+
+            
+  
