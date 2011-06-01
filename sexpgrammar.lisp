@@ -15,6 +15,13 @@
 (defparameter *I0* (list (list 'E1 
                          (list *punct* 'E))))
 
+;; while loop macro
+(defmacro while (test &rest body) 
+  `(do () 
+       ((not ,test)) 
+     ,@body))
+
+
 (defun push-back (x l)
   "Non-modifying function for appending element x to the end of the list l"
   (append l (list x)))
@@ -107,27 +114,30 @@ before nonterminal"
   "If the rule contains the punct, move punct to the next position
 like A -> .B becomes A -> B.
 if rule is like A -> B.
-then no modifaction 
-Also if no punct found just returns rule"
+then return nil;;no modifaction 
+Also if no punct found returns nil"
   (let* ((left-nonterminal (first rule))
-        (right-production (second rule))
-        (found nil)
-        (result nil)
-        (punct-position (member *punct* right-production :test 'equal)))
-    (if (and punct-position
+         (right-production (second rule))
+         (found nil)
+         (result nil)
+         (punct-position (member *punct* right-production :test 'equal)))
+    (when punct-position
+      (if (= 1 (length punct-position))
+          nil ;; last symbol is punct
+          (if (and punct-position
                (> (length punct-position) 1))
-        (progn
-          (dolist (x right-production)
-            (if (not (eq x *punct*))
-                (progn
-                  (setf result
-                        (push-back x result))
-                  (when found
-                    (setf result (push-back *punct* result))
-                    (setf found nil)))
-                (setf found t)))
-          (list left-nonterminal result))
-        rule)))
+              (progn
+                (dolist (x right-production)
+                  (if (not (eq x *punct*))
+                      (progn
+                        (setf result
+                              (push-back x result))
+                        (when found
+                          (setf result (push-back *punct* result))
+                          (setf found nil)))
+                      (setf found t)))
+                (list left-nonterminal result)))))))
+
         
 
 (defun items(I)
@@ -141,7 +151,6 @@ and produce the closure of all puncts until nothing to add"
   "helper function for adding items to items list
 used to iterate through all closures and to stop
 iteration when nothing to add"
-  (format t "called with size ~d~%" prev-size)
   (let* ((C1
           (add-closure-rules-to-closure
            C (rules-from-closure-with-moved-punct C)))
@@ -182,4 +191,16 @@ and create closure for all such new rules"
       result-list)))
 
             
-  
+(defun create-all-puncts-from-rule (rule)
+  "Create all puncts from the rule. i.e.
+for rule A -> B.CD will result the list
+A -> BC.D
+A -> BCD."
+  (let ((result nil)
+        (current-generated-rule rule))
+        (while (setf current-generated-rule
+                     (move-punct-to-right current-generated-rule))
+          (setf result (push-back current-generated-rule result)))
+        result))
+    
+    
