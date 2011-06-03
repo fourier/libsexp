@@ -16,15 +16,27 @@
                          (list *punct* 'E))))
 
 ;; while loop macro
-(defmacro while (test &rest body) 
-  `(do () 
-       ((not ,test)) 
-     ,@body))
+;; (defmacro while (test &rest body) 
+;;   `(do () 
+;;        ((not ,test)) 
+;;      ,@body))
 
 
 (defun push-back (x l)
   "Non-modifying function for appending element x to the end of the list l"
   (append l (list x)))
+
+(defun list-diff (L1 L2)
+  "Create a list containing difference between lists L1 and L2"
+  (let ((result nil))
+    (dolist (X L1)
+      (when (not (member X L2 :test 'equal))
+        (setf result (push-back X result))))
+    (dolist (X L2)
+      (when (not (member X L1 :test 'equal))
+        (setf result (push-back X result))))
+    result))
+
 
 (defun pretty-print-rule (R)
   "Pretty-print the rule R"
@@ -92,7 +104,7 @@ before nonterminal"
            (nonterminal-from-rule-for-closure rule))))
 
 
-(defun add-closure-rules-to-closure (closure-I rules)
+(defun add-items-to-closure (closure-I rules)
   "Add rules to the closure(I) if they are not already there"
   (dolist (X rules)
     (when (not
@@ -102,13 +114,14 @@ before nonterminal"
     
 (defun closure (I)
   "Construct closure array for the given set of rules with punct"
+  (when I
   (let ((s (length I)))
     (dolist (rule I)
       (let ((rules (closure-rules-for-closure-rule rule)))
-        (setf I (add-closure-rules-to-closure I rules))))
+        (setf I (add-items-to-closure I rules))))
     (if (= (length I) s)
         I
-        (closure I))))
+        (closure I)))))
 
 (defun move-punct-to-right (rule)
   "If the rule contains the punct, move punct to the next position
@@ -138,41 +151,10 @@ Also if no punct found returns nil"
                       (setf found t)))
                 (list left-nonterminal result)))))))
 
-        
-
-(defun items(I)
-  "Create a closure for the initial items list
-then move puncts for every rule in this closure
-and produce the closure of all puncts until nothing to add"
-  (let* ((C (closure I)))
-    (make-closure-rules-for-items (length C) C)))
-
-(defun make-closure-rules-for-items (prev-size C)
-  "helper function for adding items to items list
-used to iterate through all closures and to stop
-iteration when nothing to add"
-  (let* ((C1
-          (add-closure-rules-to-closure
-           C (rules-from-closure-with-moved-punct C)))
-         (new-size (length C1)))
-    (if (= new-size prev-size)
-        C1
-        (make-closure-rules-for-items new-size C1))))
-
-(defun rules-from-closure-with-moved-punct (C)
-  "Move punct to one position to the right for all rules;
-and create closure for all such new rules"
-  (dolist (R C)
-    (let* ((moved-punct-rule (move-punct-to-right R))
-           (new-closure (add-closure-rules-to-closure
-                         C
-                         (list moved-punct-rule)))
-           (closure-moved (closure new-closure)))
-      (setf C (add-closure-rules-to-closure C closure-moved))))
-  C)
-
 
 (defun goto (I X)
+  "goto function for the LR(0) grammar
+from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullman"
   (let ((goto-list nil)
         (found nil)
         (result-list nil))
@@ -186,21 +168,49 @@ and create closure for all such new rules"
               (setf goto-list (push-back R goto-list)))))))
     (when goto-list
       (dolist (R goto-list)
-        (setf result-list
-              (append result-list (closure (list (move-punct-to-right R))))))
-      result-list)))
+        (let ((rule (move-punct-to-right R)))
+          (when rule
+            (setf result-list
+                  (append result-list (closure (list (move-punct-to-right R)))))))))
+      result-list))
 
-            
-(defun create-all-puncts-from-rule (rule)
-  "Create all puncts from the rule. i.e.
-for rule A -> B.CD will result the list
-A -> BC.D
-A -> BCD."
-  (let ((result nil)
-        (current-generated-rule rule))
-        (while (setf current-generated-rule
-                     (move-punct-to-right current-generated-rule))
-          (setf result (push-back current-generated-rule result)))
+;; auxulary function - remove later if not needed
+(defun find-grammar-symbols-after-dot (I)
+  (let ((result nil))
+    (dolist (R I)
+      (let* ((right-production (second R))
+             (punct-position (member *punct* right-production :test 'equal)))
+        (when ( > (length punct-position) 1)
+          (let ((grammar-symbol (second punct-position)))
+           (when (not (find grammar-symbol result))
+              (setf result (push-back grammar-symbol result)))))))
         result))
-    
-    
+        
+(defun items (I0)
+  "items function for the LR(0) grammar
+from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullman"
+  (let* ((C (closure I0)) ;; first closure 
+         (items (list C)) ;; first items = { I0 }
+         (symbols (append *nonterminals* *terminals*))
+         (updated t))
+    (loop while updated
+       do
+         (setf updated nil)         
+    (dolist (I items)
+      (dolist (X symbols)
+        (let ((goto-items (goto I X)))
+          (when (and goto-items
+                     (notevery (lambda (x)
+                               (member x C :test 'equal))
+                             goto-items))
+                (setf C (add-items-to-closure C goto-items))
+                (setf items (push-back goto-items items))
+                (setf updated t))))))
+    items))
+
+(defun print-items (items-list)
+  (dolist (I items-list)
+    (format t "---------------~%")
+    (dolist (X I)
+      (pretty-print-rule X))))
+
