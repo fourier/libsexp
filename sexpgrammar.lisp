@@ -15,16 +15,11 @@
 (defparameter *I0* (list (list 'E1 
                          (list *punct* 'E))))
 
-;; while loop macro
-;; (defmacro while (test &rest body) 
-;;   `(do () 
-;;        ((not ,test)) 
-;;      ,@body))
-
 
 (defun push-back (x l)
   "Non-modifying function for appending element x to the end of the list l"
   (append l (list x)))
+
 
 (defun list-diff (L1 L2)
   "Create a list containing difference between lists L1 and L2"
@@ -196,16 +191,16 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
     (loop while updated
        do
          (setf updated nil)         
-    (dolist (I items)
-      (dolist (X symbols)
-        (let ((goto-items (goto I X)))
-          (when (and goto-items
-                     (notevery (lambda (x)
-                               (member x C :test 'equal))
-                             goto-items))
-                (setf C (add-items-to-closure C goto-items))
-                (setf items (push-back goto-items items))
-                (setf updated t))))))
+         (dolist (I items)
+           (dolist (X symbols)
+             (let ((goto-items (goto I X)))
+               (when (and goto-items
+                          (notevery (lambda (x)
+                                      (member x C :test 'equal))
+                                    goto-items))
+                 (setf C (add-items-to-closure C goto-items))
+                 (setf items (push-back goto-items items))
+                 (setf updated t))))))
     items))
 
 (defun print-items (items-list)
@@ -214,3 +209,10 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
     (dolist (X I)
       (pretty-print-rule X))))
 
+
+
+;(defun first (X)
+;  )
+
+;(defun follow (X)
+;  )
