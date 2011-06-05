@@ -293,10 +293,5 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
                               
                         
 
-              
-                                        
-
-  
-
-(defun follow-grammar-function (X)
+(defun follow-grammar-function (X terminals nonterminals grammar)
   )
