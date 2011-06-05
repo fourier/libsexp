@@ -9,7 +9,7 @@
    (list 'E 'T)                ;; E -> T
    (list 'T (list 'T '* 'F))   ;; T -> T*F
    (list 'T 'F)                ;; T -> F
-   (list 'F (list '\( 'E '\)))   ;; F -> [E]
+   (list 'F (list '\( 'E '\)))   ;; F -> (E)
    (list 'F 'id)))             ;; F -> id
 
 (defparameter *I0* (list (list 'E1 
@@ -210,9 +210,93 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
       (pretty-print-rule X))))
 
 
+(defun test-first-grammar()
+  (let ((*terminals* (list '\( '\) 'id '+ '*))
+        (*nonterminals* (list 'E1 'E 'T 'T1 'F))
+        (*grammar* 
+         (list 
+          (list 'E (list 'T 'E1))      ; E -> TE1
+          (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
+          (list 'E1 *epslilon*)       ; E1 -> epsilon
+          (list 'T (list 'F 'T1))      ; T -> FT1
+          (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
+          (list 'T1 *epslilon*)       ; T1 -> epsilon
+          (list 'F (list '\( 'E '\))) ; F -> (E)
+          (list 'F 'id))))           ; F -> id
+    ;; (first-grammar-function 'F *terminals* *nonterminals* *grammar*)))
+  (dolist (X *nonterminals*)
+    (format t "term = ~a: " (symbol-name X))
+    (print
+     (first-grammar-function X *terminals* *nonterminals* *grammar*))
+    (format t "~%"))))
 
-;(defun first (X)
-;  )
 
-;(defun follow (X)
-;  )
+
+(defun first-grammar-function (X terminals nonterminals grammar)
+  ;; (declare (optimize (debug 3)))
+  (let ((first-list nil))                 ; result
+    (if (atom X)                          ; when X is a symbol
+        (if (member X terminals)
+            (setf first-list (list X))
+            (flet ((epsilon-pred (rule)
+                     (eq (second rule) *epslilon*))
+                   (find-productions (Y)
+                     (remove-if-not (lambda (rule)
+                                      (eq (first rule) Y))
+                                    grammar)))
+              (let ((productions            ; list of productions from X
+                     (find-productions X)))
+                ;; find epsilon-productions
+                (when (some #'epsilon-pred  productions)
+                  (push *epslilon* first-list)
+                  (setf productions (remove-if #'epsilon-pred productions)))
+                ;; ok, epsilon-productions removed, epsilon-element added
+                ;; to result
+                ;; loop by elements of every production
+                (dolist (prod productions)
+                  (let ((rule (second prod)))
+                    (if (atom rule)       ; if atom simply put to the result list
+                        ;; since we don't have epsilon-productions already
+                        (push rule first-list)
+                        ;; otherwise, loop by elements of production
+                        (progn 
+                          (dolist (Y rule)
+                            ;; (break)
+                            ;; for every element Yi find FIRST(Yi)
+                            (let ((first-list-Y (first-grammar-function Y
+                                                                        terminals
+                                                                        nonterminals
+                                                                        grammar)))
+                              ;; if FIRST(Yi) doesn't contain epsilon, add
+                              ;; FIRST(Y) to the FIRST list and stop the loop
+                              (when (not (member *epslilon* first-list-Y))
+                                (setf first-list (append first-list first-list-Y))
+                                (return))))
+                          (when (not first-list)
+                            (push *epslilon* first-list)))))))))
+        ;; when X-is a word, like X1 X2 X3
+        (progn 
+          (dolist (Y X)
+            (let ((first-list-Y (first-grammar-function Y
+                                                        terminals
+                                                        nonterminals
+                                                        grammar)))
+              (dolist (Z first-list-Y)
+                (unless (eq Z *epslilon*)
+                  (push Z first-list)))
+              (unless (member *epslilon* first-list-Y)
+                (return))))
+          (when (not first-list)
+            (push *epslilon* first-list))))
+    first-list))
+                            
+                              
+                        
+
+              
+                                        
+
+  
+
+(defun follow-grammar-function (X)
+  )
