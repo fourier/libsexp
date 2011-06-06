@@ -225,55 +225,92 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
           (list 'F 'id))))           ; F -> id
     ;; (first-grammar-function 'F *terminals* *nonterminals* *grammar*)))
   (dolist (X *nonterminals*)
-    (format t "term = ~a: " (symbol-name X))
+    (format t "term = ~a: " X)
+    (print
+     (first-grammar-function X *terminals* *nonterminals* *grammar*))
+    (format t "~%"))))
+
+(defun test-first-grammar1()
+  (let ((*terminals* (list 'a 'b 'c))
+        (*nonterminals* (list 'S 'E 'L))
+        (*grammar*
+         (list
+          (list 'S (list 'a)) ; S -> a
+          (list 'S (list 'L)) ; S -> L
+          (list 'E 'S)        ; E -> S
+          (list 'E (list 'S 'E)) ; E -> SE
+          (list 'L (list 'b 'c)) ;L -> bc
+          (list 'L (list 'b 'E 'c))))) ; L -> bEc
+    ;; (print
+    ;;  (first-grammar-function 'E *terminals* *nonterminals* *grammar*))
+  (dolist (X (append *nonterminals* (list (list 'S 'E)
+                                          (list 'b 'E 'c)
+                                          (list 'b 'c))))
+    (format t "term = ~a: " X)
     (print
      (first-grammar-function X *terminals* *nonterminals* *grammar*))
     (format t "~%"))))
 
 
-
 (defun first-grammar-function (X terminals nonterminals grammar)
   ;; (declare (optimize (debug 3)))
   (let ((first-list nil))                 ; result
+    (labels ((epsilon-pred (rule)
+               (eq (second rule) *epslilon*))
+             (find-productions (Y)
+               (remove-if-not (lambda (rule)
+                                (eq (first rule) Y))
+                              grammar))
+             (add-to-results-atom (item)
+               (when (not (member item first-list))
+                 (setf first-list
+                       (append first-list (list item)))))
+             (add-to-results (item)
+               (if (atom item)
+                   (add-to-results-atom item)
+                   (dolist (r item)
+                     (add-to-results-atom r)))))
     (if (atom X)                          ; when X is a symbol
         (if (member X terminals)
             (setf first-list (list X))
-            (flet ((epsilon-pred (rule)
-                     (eq (second rule) *epslilon*))
-                   (find-productions (Y)
-                     (remove-if-not (lambda (rule)
-                                      (eq (first rule) Y))
-                                    grammar)))
-              (let ((productions            ; list of productions from X
-                     (find-productions X)))
-                ;; find epsilon-productions
-                (when (some #'epsilon-pred  productions)
-                  (push *epslilon* first-list)
-                  (setf productions (remove-if #'epsilon-pred productions)))
-                ;; ok, epsilon-productions removed, epsilon-element added
-                ;; to result
-                ;; loop by elements of every production
-                (dolist (prod productions)
-                  (let ((rule (second prod)))
-                    (if (atom rule)       ; if atom simply put to the result list
-                        ;; since we don't have epsilon-productions already
-                        (push rule first-list)
-                        ;; otherwise, loop by elements of production
-                        (progn 
-                          (dolist (Y rule)
-                            ;; (break)
-                            ;; for every element Yi find FIRST(Yi)
-                            (let ((first-list-Y (first-grammar-function Y
-                                                                        terminals
-                                                                        nonterminals
-                                                                        grammar)))
-                              ;; if FIRST(Yi) doesn't contain epsilon, add
-                              ;; FIRST(Y) to the FIRST list and stop the loop
-                              (when (not (member *epslilon* first-list-Y))
-                                (setf first-list (append first-list first-list-Y))
-                                (return))))
-                          (when (not first-list)
-                            (push *epslilon* first-list)))))))))
+            (let ((productions            ; list of productions from X
+                   (find-productions X)))
+              ;; find epsilon-productions
+              (when (some #'epsilon-pred  productions)
+                (add-to-results *epslilon*)
+                (setf productions (remove-if #'epsilon-pred productions)))
+              ;; ok, epsilon-productions removed, epsilon-element added
+              ;; to result
+              ;; loop by elements of every production
+              (dolist (prod productions)
+                (let ((rule (second prod)))
+                  (if (atom rule)
+                      ;; if atom simply put FIRST(Y)
+                      ;; to the result list
+                      ;; since we don't have epsilon-productions already
+                      (add-to-results (first-grammar-function rule
+                                                              terminals
+                                                              nonterminals
+                                                              grammar))
+                      ;; otherwise, loop by elements of production
+                      (progn 
+                        (dolist (Y rule)
+                          ;; (break)
+                          ;; for every element Yi find FIRST(Yi)
+                          ;; AND when Yi != X (this is added to avoid
+                          ;; infinite recursion for rules like E -> ET
+                          (unless (eq Y X)
+                          (let ((first-list-Y (first-grammar-function Y
+                                                                      terminals
+                                                                      nonterminals
+                                                                      grammar)))
+                            ;; if FIRST(Yi) doesn't contain epsilon, add
+                            ;; FIRST(Y) to the FIRST list and stop the loop
+                            (when (not (member *epslilon* first-list-Y))
+                              (add-to-results first-list-Y)
+                              (return)))))
+                        (when (not first-list)
+                          (add-to-results *epslilon*))))))))
         ;; when X-is a word, like X1 X2 X3
         (progn 
           (dolist (Y X)
@@ -283,12 +320,12 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
                                                         grammar)))
               (dolist (Z first-list-Y)
                 (unless (eq Z *epslilon*)
-                  (push Z first-list)))
+                  (add-to-results Z)))
               (unless (member *epslilon* first-list-Y)
                 (return))))
           (when (not first-list)
-            (push *epslilon* first-list))))
-    first-list))
+            (add-to-results *epslilon*))))
+    first-list)))
                             
                               
                         
