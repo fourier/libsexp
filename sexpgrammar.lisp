@@ -1,5 +1,6 @@
 (defparameter *punct* 'p)
-(defparameter *epslilon* '$)
+(defparameter *empty* 'empty)
+(defparameter *end*   '$)
 (defparameter *terminals* (list '\( '\) 'id '+ '*))
 (defparameter *nonterminals* (list 'E1 'E 'T 'F))
 (defparameter *grammar*
@@ -81,7 +82,7 @@ do the actual work for right-side of the rule"
   (let ((production (second rule)))
     (not
      (and (atom production)
-          (eq production *epslilon*)))))
+          (eq production *empty*)))))
 
 (defun rule-for-closure (rule)
   "Construct rule for the closure - add punct at the first position
@@ -210,58 +211,9 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
       (pretty-print-rule X))))
 
 
-(defun test-first-grammar()
-  (let ((*terminals* (list '\( '\) 'id '+ '*))
-        (*nonterminals* (list 'E1 'E 'T 'T1 'F))
-        (*grammar* 
-         (list 
-          (list 'E (list 'T 'E1))      ; E -> TE1
-          (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
-          (list 'E1 *epslilon*)       ; E1 -> epsilon
-          (list 'T (list 'F 'T1))      ; T -> FT1
-          (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
-          (list 'T1 *epslilon*)       ; T1 -> epsilon
-          (list 'F (list '\( 'E '\))) ; F -> (E)
-          (list 'F 'id))))           ; F -> id
-    ;; (first-grammar-function 'F *terminals* *nonterminals* *grammar*)))
-  (dolist (X *nonterminals*)
-    (format t "term = ~a: " X)
-    (print
-     (first-grammar-function X *terminals* *nonterminals* *grammar*))
-    (format t "~%"))))
-
-(defun test-first-grammar1()
-  (let ((*terminals* (list 'a 'b 'c))
-        (*nonterminals* (list 'S 'E 'L))
-        (*grammar*
-         (list
-          (list 'S (list 'a)) ; S -> a
-          (list 'S (list 'L)) ; S -> L
-          (list 'E 'S)        ; E -> S
-          (list 'E (list 'S 'E)) ; E -> SE
-          (list 'L (list 'b 'c)) ;L -> bc
-          (list 'L (list 'b 'E 'c))))) ; L -> bEc
-    ;; (print
-    ;;  (first-grammar-function 'E *terminals* *nonterminals* *grammar*))
-  (dolist (X (append *nonterminals* (list (list 'S 'E)
-                                          (list 'b 'E 'c)
-                                          (list 'b 'c))))
-    (format t "term = ~a: " X)
-    (print
-     (first-grammar-function X *terminals* *nonterminals* *grammar*))
-    (format t "~%"))))
-
-
-(defun first-grammar-function (X terminals nonterminals grammar)
-  ;; (declare (optimize (debug 3)))
+(defun first-function (word first-table)
   (let ((first-list nil))                 ; result
-    (labels ((epsilon-pred (rule)
-               (eq (second rule) *epslilon*))
-             (find-productions (Y)
-               (remove-if-not (lambda (rule)
-                                (eq (first rule) Y))
-                              grammar))
-             (add-to-results-atom (item)
+    (labels ((add-to-results-atom (item)
                (when (not (member item first-list))
                  (setf first-list
                        (append first-list (list item)))))
@@ -270,65 +222,126 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
                    (add-to-results-atom item)
                    (dolist (r item)
                      (add-to-results-atom r)))))
-    (if (atom X)                          ; when X is a symbol
-        (if (member X terminals)
-            (setf first-list (list X))
-            (let ((productions            ; list of productions from X
-                   (find-productions X)))
-              ;; find epsilon-productions
-              (when (some #'epsilon-pred  productions)
-                (add-to-results *epslilon*)
-                (setf productions (remove-if #'epsilon-pred productions)))
-              ;; ok, epsilon-productions removed, epsilon-element added
-              ;; to result
-              ;; loop by elements of every production
-              (dolist (prod productions)
-                (let ((rule (second prod)))
-                  (if (atom rule)
-                      ;; if atom simply put FIRST(Y)
-                      ;; to the result list
-                      ;; since we don't have epsilon-productions already
-                      (add-to-results (first-grammar-function rule
-                                                              terminals
-                                                              nonterminals
-                                                              grammar))
-                      ;; otherwise, loop by elements of production
-                      (progn 
-                        (dolist (Y rule)
-                          ;; (break)
-                          ;; for every element Yi find FIRST(Yi)
-                          ;; AND when Yi != X (this is added to avoid
-                          ;; infinite recursion for rules like E -> ET
-                          (unless (eq Y X)
-                          (let ((first-list-Y (first-grammar-function Y
-                                                                      terminals
-                                                                      nonterminals
-                                                                      grammar)))
-                            ;; if FIRST(Yi) doesn't contain epsilon, add
-                            ;; FIRST(Y) to the FIRST list and stop the loop
-                            (when (not (member *epslilon* first-list-Y))
-                              (add-to-results first-list-Y)
-                              (return)))))
-                        (when (not first-list)
-                          (add-to-results *epslilon*))))))))
+      (if (atom word)
+          (gethash word first-table)
         ;; when X-is a word, like X1 X2 X3
         (progn 
-          (dolist (Y X)
-            (let ((first-list-Y (first-grammar-function Y
-                                                        terminals
-                                                        nonterminals
-                                                        grammar)))
+          (dolist (Y word)
+            (let ((first-list-Y (gethash Y first-table)))
               (dolist (Z first-list-Y)
-                (unless (eq Z *epslilon*)
+                (unless (eq Z *empty*)
                   (add-to-results Z)))
-              (unless (member *epslilon* first-list-Y)
+              (unless (member *empty* first-list-Y)
                 (return))))
           (when (not first-list)
-            (add-to-results *epslilon*))))
-    first-list)))
-                            
-                              
+            (add-to-results *empty*))
+          first-list)))))
+
                         
 
-(defun follow-grammar-function (X terminals nonterminals grammar)
-  )
+(defun create-first-tables (terminals nonterminals grammar)
+  (let ((first-table (make-hash-table))) ; define result as a hash table
+    ;; helper functions
+    (labels ((epsilon-production-p (rule)        ; is rule the epsilon-production?
+               (eq (second rule) *empty*)) 
+             (find-productions (Y)      ; all productions from the given
+                                        ; nonterminal Y
+               (remove-if-not (lambda (rule)
+                                (eq (first rule) Y))
+                              grammar))
+             (add-to-results-atom (alpha item) ; add single result to the table
+               (when (and item (not (member item (gethash alpha first-table))))
+                 (setf (gethash alpha first-table)
+                       (append (gethash alpha first-table) (list item)))))
+             (add-to-results (alpha item) ; add result(list or atom) to the table
+               (if (atom item)
+                   (add-to-results-atom alpha item)
+                   (dolist (r item)
+                     (add-to-results-atom alpha r))))
+             (first-table-size ()
+               (loop for key being the hash-keys of first-table 
+                  using (hash-value value) 
+                  sum (length value))))
+      ;; 1) add all terminals to the table
+      (dolist (X terminals)
+        (add-to-results-atom X X))
+      ;; 2) add all empty productions to appropriate nonterminals
+      (dolist (R grammar)
+        (when (epsilon-production-p R)
+          (add-to-results-atom (first R) *empty*)))
+      ;; loop until table size is not changing
+      (let ((current-table-size 0))
+        (loop while (/= current-table-size
+                        (setf current-table-size (first-table-size)))
+             do
+      ;; 3) loop by all nonterminals
+      (dolist (X nonterminals)
+        (let ((productions            ; list of non-epsilon productions from X
+               (remove-if #'epsilon-production-p (find-productions X))))
+          ;; loop by elements of every production        
+          (dolist (R productions)
+            (let ((rule (second R)))
+              (if (atom rule)
+                  ;; if atom simply put FIRST(rule)
+                  ;; to the result list
+                  (when (gethash rule first-table)
+                    (add-to-results X (gethash rule first-table)))
+                  ;; othewise loop by all elements
+                  (progn 
+                    (dolist (Y rule)
+                      ;; for every element Yi find FIRST(Yi)
+                      (if (not (eq Y X))
+                          (let ((first-list-Y (gethash Y first-table)))
+                            ;; if FIRST(Yi) doesn't contain epsilon, add
+                            ;; FIRST(Y) to the FIRST list and stop the loop
+                            (when (not (member *empty* first-list-Y))
+                              (add-to-results X first-list-Y)
+                              (return)))
+                          (add-to-results X (gethash Y first-table)))))))))))
+        ))
+    first-table))
+  
+(defun test-create-first-tables()
+  (let ((*terminals* (list '\( '\) 'id '+ '*))
+        (*nonterminals* (list 'E1 'E 'T 'T1 'F))
+        (*grammar* 
+         (list 
+          (list 'E (list 'T 'E1))      ; E -> TE1
+          (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
+          (list 'E1 *empty*)       ; E1 -> epsilon
+          (list 'T (list 'F 'T1))      ; T -> FT1
+          (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
+          (list 'T1 *empty*)       ; T1 -> epsilon
+          (list 'F (list '\( 'E '\))) ; F -> (E)
+          (list 'F 'id))))           ; F -> id
+    (let ((table (create-first-tables *terminals* *nonterminals* *grammar*)))
+      (dolist (X *nonterminals*)
+        (format t "term = ~a: " X)
+        (print
+         (gethash X table))
+        (format t "~%")))))
+
+(defun test-create-first-tables1()
+  (let* ((*terminals* (list 'a 'b 'c))
+         (*nonterminals* (list 'S 'E 'L))
+         (*grammar*
+          (list
+           (list 'S (list 'a)) ; S -> a
+           (list 'S (list 'L)) ; S -> L
+           (list 'E 'S)        ; E -> S
+           (list 'E (list 'S 'E)) ; E -> SE
+           (list 'L (list 'b 'c)) ;L -> bc
+           (list 'L (list 'b 'E 'c)))) ; L -> bEc
+         (first-table (create-first-tables *terminals* *nonterminals* *grammar*)))
+      (dolist (X
+                (append *nonterminals*
+                        (list (list 'S 'E) ;; FIRST(SE)  = {a,b}
+                              (list 'b 'E 'c) ;; FIRST(bEc) = {b}
+                              (list 'b 'c)))) ;; FIRST(bc)  = {b}
+        (format t "term = ~a: " X)
+        (print
+         ;; (gethash X first-table))
+         (first-function X first-table))
+        (format t "~%"))))
+
+
