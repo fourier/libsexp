@@ -1,6 +1,8 @@
 (defparameter *punct* 'p)
 (defparameter *empty* 'empty)
 (defparameter *end*   '$)
+
+;; 0-grammar
 (defparameter *terminals* (list '\( '\) 'id '+ '*))
 (defparameter *nonterminals* (list 'E1 'E 'T 'F))
 (defparameter *grammar*
@@ -15,6 +17,34 @@
 
 (defparameter *I0* (list (list 'E1 
                          (list *punct* 'E))))
+
+;; 1-grammar
+(defparameter *terminals1* (list '\( '\) 'id '+ '*))
+(defparameter *nonterminals1* (list 'E1 'E 'T 'T1 'F))
+(defparameter *grammar1* 
+  (list 
+   (list 'E (list 'T 'E1))      ; E -> TE1
+   (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
+   (list 'E1 *empty*)       ; E1 -> epsilon
+   (list 'T (list 'F 'T1))      ; T -> FT1
+   (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
+   (list 'T1 *empty*)       ; T1 -> epsilon
+   (list 'F (list '\( 'E '\))) ; F -> (E)
+   (list 'F 'id)))           ; F -> id
+
+(defparameter *terminals2* (list 'a '\( '\)))
+(defparameter *nonterminals2* (list 'S 'E 'L))
+(defparameter *grammar2*
+  (list
+   (list 'S (list 'a)) ; S -> a
+   (list 'S (list 'L)) ; S -> L
+   (list 'E 'S)        ; E -> S
+   (list 'E (list 'S 'E)) ; E -> SE
+   (list 'L (list '\( '\))) ;L -> ()
+   (list 'L (list '\( 'E '\))))) ; L -> (E)
+
+
+
 
 
 (defun push-back (x l)
@@ -237,7 +267,12 @@ This function accepts either atoms or lists(as a word in grammar)"
     (labels
         ((add-to-results (item) ; add result(list or atom) to the table
            (setf first-list
-                 (append-unique item first-list))))
+                 (append-unique item first-list)))
+         (every-contains-empty (word)
+           (if (not word) t
+               (and 
+                (member *empty* (gethash (car word) first-table))
+                (every-contains-empty (cdr word))))))
       (if (atom word)
           (gethash word first-table)
         ;; when X-is a word, like X1 X2 X3
@@ -249,7 +284,7 @@ This function accepts either atoms or lists(as a word in grammar)"
                   (add-to-results Z)))
               (unless (member *empty* first-list-Y)
                 (return))))
-          (when (not first-list)
+          (when (every-contains-empty word)
             (add-to-results *empty*))
           first-list)))))
                         
@@ -312,6 +347,54 @@ with conjunction with first-function"
                               (return)))
                           (add-to-results X (gethash Y first-table)))))))))))))
     first-table))
+
+
+(defun create-follow-table (terminals nonterminals grammar)
+  (let ((follow-table (make-hash-table)) ; define result as a hash table
+        (first-table (create-first-table terminals nonterminals grammar)))
+    ;; helper functions
+    (labels ((add-to-results (alpha item) ; add result(list or atom) to the table
+                                        ; except *empty*
+               (let ((items (remove-if (lambda (x) (eq x *empty*))
+                                        (gethash alpha follow-table))))
+                 (setf (gethash alpha follow-table)
+                       (append-unique item items))))
+             (follow-table-size ()
+               (loop for key being the hash-keys of follow-table 
+                  using (hash-value value) 
+                  sum (length value))))
+      ;; 1) put the $ to the follow table for the start symbol
+      (add-to-results (first (first grammar)) *end*)
+      ;; loop until table size is not changing
+      (let ((current-table-size 0))
+        (loop while (/= current-table-size
+                        (setf current-table-size (follow-table-size)))
+           do
+      ;; 2) loop by nonterminals
+      (dolist (X nonterminals)
+        ;; 2.1) loop by grammar rules to find rules like A->wXv
+        (dolist (R grammar)
+          (let ((rule (second R)))
+            (when (listp rule)
+              (let ((tail (member X rule)))
+                (when (and tail (> (length tail) 1))
+                  ;; (print tail)
+                  (add-to-results X (first-function (cdr tail) first-table)))))))
+        ;; 2.2) loop by grammar again to find rules like A->wB or A->wBv
+        (dolist (R grammar)
+          ;; (format t "~a: ~a~%" X R)
+          (let ((rule (second R)))
+            (if (atom rule)
+                (when (eq rule X)
+                  (add-to-results X (gethash (first R) follow-table)))
+                (let ((tail (member X rule)))
+                  (when (and tail
+                             (or (= (length tail) 1)
+                                 (find *empty*
+                                       (first-function (cdr tail) first-table))))
+                    (add-to-results X (gethash (first R) follow-table)))))))))))
+      follow-table))
+  
   
 ;;
 ;; Tests
@@ -327,44 +410,21 @@ with conjunction with first-function"
 
 
 (defun test-create-first-table1()
-  (let* ((*terminals* (list '\( '\) 'id '+ '*))
-        (*nonterminals* (list 'E1 'E 'T 'T1 'F))
-        (*grammar* 
-         (list 
-          (list 'E (list 'T 'E1))      ; E -> TE1
-          (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
-          (list 'E1 *empty*)       ; E1 -> epsilon
-          (list 'T (list 'F 'T1))      ; T -> FT1
-          (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
-          (list 'T1 *empty*)       ; T1 -> epsilon
-          (list 'F (list '\( 'E '\))) ; F -> (E)
-          (list 'F 'id)))           ; F -> id
-         (first-table (create-first-table *terminals* *nonterminals* *grammar*)))
-    (dolist (X *nonterminals*)
+  (let ((first-table (create-first-table *terminals1* *nonterminals1* *grammar1*)))
+    (dolist (X *nonterminals1*)
       (format t "term = ~a: " X)
       (print
        (first-function X first-table))
         (format t "~%"))))
 
 (defun test-create-first-table2()
-  (let* ((*terminals* (list 'a 'b 'c))
-         (*nonterminals* (list 'S 'E 'L))
-         (*grammar*
-          (list
-           (list 'S (list 'a)) ; S -> a
-           (list 'S (list 'L)) ; S -> L
-           (list 'E 'S)        ; E -> S
-           (list 'E (list 'S 'E)) ; E -> SE
-           (list 'L (list 'b 'c)) ;L -> bc
-           (list 'L (list 'b 'E 'c)))) ; L -> bEc
-         (first-table (create-first-table *terminals* *nonterminals* *grammar*)))
+  (let ((first-table (create-first-table *terminals2* *nonterminals2* *grammar2*)))
     (dolist (X
-              (append *nonterminals*
+              (append *nonterminals2*
                       (list 
                        (list 'S 'E) ;;FIRST(SE)  = {a,b}
                        (list 'b 'E 'c);;  FIRST(bEc) = {b}
                        (list 'b 'c))));;  FIRST(bc)  = {b}
-
       (format t "term = ~a: " X)
       (print
        (first-function X first-table))
