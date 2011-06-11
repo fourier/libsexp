@@ -29,33 +29,36 @@
 
 1.4.1 Rename grammar for simplicty
   Lets write again grammar, rename terminal and nonterminal symbols for
-  simplicity. Terminals: {a,b,c}. Nonterminals: {S,E,L}
+  simplicity. Terminals: {a,(,)}. Nonterminals: {S,E,L}
 1.  S -> a | L
 2.  E -> S|SE
-3.  L -> bc | bEc
+3.  L -> () | (E)
 
 1.4.2 Build function FIRST
   Lets build function FIRST for grammar G1, considering
   FIRST(terminal X) = X,
   FIRST(nonterminal X) = {first terminals derived from X}:
   
-  FIRST(a)   = a
-  FIRST(b)   = b
-  FIRST(c)   = c
-  FIRST(S)   = {a,b}
-  FIRST(E)   = {a,b}
-  FIRST(L)   = {b}
-  FIRST(SE)  = {a,b}
-  FIRST(bEc) = {b}
-  FIRST(bc)  = {b}
+  FIRST(a)   = {a}
+  FIRST(()   = {(}
+  FIRST())   = {)}
+  FIRST(S)   = {a,(}
+  FIRST(E)   = {a,(}
+  FIRST(L)   = {(}
+  FIRST(SE)  = {(,)}
+  FIRST(bEc) = {(}
+  FIRST(bc)  = {(}
 
 1.4.3 Build function FOLLOW  
   Lets build funciton FOLLOW(X) defined for nonterminals, considering $
   as a end of the token stream($ will be always in the end of the FOLLOW):
+
+  TODO: reinvestigate this table!
   
-  FOLLOW(S) = {c,$}
-  FOLLOW(E) = {c,$}
-  FOLLOW(L) = {c,$}
+  FOLLOW(S) = {),$}
+  FOLLOW(E) = {),$}
+  FOLLOW(L) = {),$}
+  
 
 1.4.4 Build the table for predictive(LL) analysis
   Expanded grammar:
