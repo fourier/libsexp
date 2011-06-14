@@ -2,48 +2,56 @@
 (defparameter *empty* 'empty)
 (defparameter *end*   '$)
 
+(defstruct grammar
+  (terminals nil :type list)
+  (nonterminals nil :type list)
+  (rules nil :type list))
+
 ;; 0-grammar
-(defparameter *terminals* (list '\( '\) 'id '+ '*))
-(defparameter *nonterminals* (list 'E1 'E 'T 'F))
-(defparameter *grammar*
-  (list 
-   (list 'E1 'E)               ;; E' -> E
-   (list 'E (list 'E '+ 'T))   ;; E -> E+T
-   (list 'E 'T)                ;; E -> T
-   (list 'T (list 'T '* 'F))   ;; T -> T*F
-   (list 'T 'F)                ;; T -> F
-   (list 'F (list '\( 'E '\)))   ;; F -> (E)
-   (list 'F 'id)))             ;; F -> id
+(defparameter *grammar-0* (make-grammar
+                         :terminals (list '\( '\) 'id '+ '*)
+                         :nonterminals (list 'E1 'E 'T 'F)
+                         :rules 
+                         (list 
+                          (list 'E1 'E)               ; E' -> E
+                          (list 'E (list 'E '+ 'T))   ; E -> E+T
+                          (list 'E 'T)                ; E -> T
+                          (list 'T (list 'T '* 'F))   ; T -> T*F
+                          (list 'T 'F)                ; T -> F
+                          (list 'F (list '\( 'E '\))) ; F -> (E)
+                          (list 'F 'id))))            ; F -> id
 
 (defparameter *I0* (list (list 'E1 
                          (list *punct* 'E))))
 
 ;; 1-grammar
-(defparameter *terminals1* (list '\( '\) 'id '+ '*))
-(defparameter *nonterminals1* (list 'E1 'E 'T 'T1 'F))
-(defparameter *grammar1* 
-  (list 
-   (list 'E (list 'T 'E1))      ; E -> TE1
-   (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
-   (list 'E1 *empty*)       ; E1 -> epsilon
-   (list 'T (list 'F 'T1))      ; T -> FT1
-   (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
-   (list 'T1 *empty*)       ; T1 -> epsilon
-   (list 'F (list '\( 'E '\))) ; F -> (E)
-   (list 'F 'id)))           ; F -> id
+(defparameter *grammar-1* (make-grammar
+                         :terminals (list '\( '\) 'id '+ '*)
+                         :nonterminals (list 'E1 'E 'T 'T1 'F)
+                         :rules
+                         (list 
+                          (list 'E (list 'T 'E1))     ; E -> TE1
+                          (list 'E1 (list '+ 'T 'E1)) ; E1 -> +TE1
+                          (list 'E1 *empty*)          ; E1 -> epsilon
+                          (list 'T (list 'F 'T1))     ; T -> FT1
+                          (list 'T1 (list '* 'F 'T1)) ; T1 -> *FT1
+                          (list 'T1 *empty*)          ; T1 -> epsilon
+                          (list 'F (list '\( 'E '\))) ; F -> (E)
+                          (list 'F 'id))))            ; F -> id
 
-(defparameter *terminals2* (list 'a '\( '\)))
-(defparameter *nonterminals2* (list 'S 'E 'L))
-(defparameter *grammar2*
-  (list
-   (list 'S (list 'a)) ; S -> a
-   (list 'S (list 'L)) ; S -> L
-   (list 'E 'S)        ; E -> S
-   (list 'E (list 'S 'E)) ; E -> SE
-   (list 'L (list '\( '\))) ;L -> ()
-   (list 'L (list '\( 'E '\))))) ; L -> (E)
+;; 2-grammar
 
-
+(defparameter *grammar-2* (make-grammar
+                         :terminals (list 'a '\( '\))
+                         :nonterminals (list 'S 'E 'L)
+                         :rules
+                         (list
+                          (list 'S (list 'a))            ; S -> a
+                          (list 'S (list 'L))            ; S -> L
+                          (list 'E 'S)                   ; E -> S
+                          (list 'E (list 'S 'E))         ; E -> SE
+                          (list 'L (list '\( '\)))       ;L -> ()
+                          (list 'L (list '\( 'E '\)))))) ; L -> (E)
 
 
 
@@ -274,7 +282,9 @@ This function accepts either atoms or lists(as a word in grammar)"
                 (member *empty* (gethash (car word) first-table))
                 (every-contains-empty (cdr word))))))
       (if (atom word)
-          (gethash word first-table)
+          (if (eq word *empty*)
+              (list *empty*)
+              (gethash word first-table))
         ;; when X-is a word, like X1 X2 X3
         (progn 
           (dolist (Y word)
@@ -289,12 +299,15 @@ This function accepts either atoms or lists(as a word in grammar)"
           first-list)))))
                         
 
-(defun create-first-table (terminals nonterminals grammar)
+(defun create-first-table (grammar)
   "FIRST(X) function for LL and LR(0) parsers
 from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullman.
 Creates the hash-table with keys - terminals or nonterminals. Shall be used
 with conjunction with first-function"
-  (let ((first-table (make-hash-table))) ; define result as a hash table
+  (let ((first-table (make-hash-table)) ; define result as a hash table
+        (terminals (grammar-terminals grammar))
+        (nonterminals (grammar-nonterminals grammar))
+        (rules (grammar-rules grammar)))
     ;; helper functions
     (labels ((epsilon-production-p (rule)        ; is rule the epsilon-production?
                (eq (second rule) *empty*)) 
@@ -302,7 +315,7 @@ with conjunction with first-function"
                                         ; nonterminal Y
                (remove-if-not (lambda (rule)
                                 (eq (first rule) Y))
-                              grammar))
+                              rules))
              (add-to-results (alpha item) ; add result(list or atom) to the table
                (setf (gethash alpha first-table)
                      (append-unique item (gethash alpha first-table))))
@@ -314,7 +327,7 @@ with conjunction with first-function"
       (dolist (X terminals)
         (add-to-results X X))
       ;; 2) add all empty productions to appropriate nonterminals
-      (dolist (R grammar)
+      (dolist (R rules)
         (when (epsilon-production-p R)
           (add-to-results (first R) *empty*)))
       ;; loop until table size is not changing
@@ -349,9 +362,11 @@ with conjunction with first-function"
     first-table))
 
 
-(defun create-follow-table (terminals nonterminals grammar)
+(defun create-follow-table (grammar)
   (let ((follow-table (make-hash-table)) ; define result as a hash table
-        (first-table (create-first-table terminals nonterminals grammar)))
+        (first-table (create-first-table grammar))
+        (nonterminals (grammar-nonterminals grammar))
+        (rules (grammar-rules grammar)))
     ;; helper functions
     (labels ((add-to-results (alpha item) ; add result(list or atom) to the table
                                         ; except *empty*
@@ -364,7 +379,7 @@ with conjunction with first-function"
                   using (hash-value value) 
                   sum (length value))))
       ;; 1) put the $ to the follow table for the start symbol
-      (add-to-results (first (first grammar)) *end*)
+      (add-to-results (first (first rules)) *end*)
       ;; loop until table size is not changing
       (let ((current-table-size 0))
         (loop while (/= current-table-size
@@ -372,17 +387,16 @@ with conjunction with first-function"
            do
       ;; 2) loop by nonterminals
       (dolist (X nonterminals)
-        ;; 2.1) loop by grammar rules to find rules like A->wXv
-        (dolist (R grammar)
+        ;; 2.1) loop by rules to find rules like A->wXv
+        (dolist (R rules)
           (let ((rule (second R)))
             (when (listp rule)
               (let ((tail (member X rule)))
                 (when (and tail (> (length tail) 1))
                   ;; (print tail)
                   (add-to-results X (first-function (cdr tail) first-table)))))))
-        ;; 2.2) loop by grammar again to find rules like A->wB or A->wBv
-        (dolist (R grammar)
-          ;; (format t "~a: ~a~%" X R)
+        ;; 2.2) loop by rules again to find rules like A->wB or A->wBv
+        (dolist (R rules)
           (let ((rule (second R)))
             (if (atom rule)
                 (when (eq rule X)
@@ -395,14 +409,47 @@ with conjunction with first-function"
                     (add-to-results X (gethash (first R) follow-table)))))))))))
       follow-table))
   
-  
+
+(defun create-ll0-table (grammar)
+  (let ((first-table (create-first-table grammar))
+        (follow-table (create-follow-table grammar))
+        (ll0-table (make-hash-table)))
+    (flet ((add (term rule)
+               ;; already contains rule
+               (if (gethash term (gethash (first rule) ll0-table)) 
+                   (setf (gethash term (gethash (first rule) ll0-table))
+                         (append (gethash term (gethash (first rule) ll0-table))
+                                 (list rule)))
+                ;; no rule, add a new one
+                (setf (gethash term (gethash (first rule) ll0-table))
+                      (list rule)))))
+    ;; initialize results table
+    (dolist (X (append (grammar-nonterminals grammar) (list *end*)))
+      (setf (gethash X ll0-table) (make-hash-table)))
+    (dolist (rule (grammar-rules grammar))
+      (let ((first-for-production (first-function (second rule) first-table)))
+        (dolist (X first-for-production)
+          (when (member X (grammar-terminals grammar))
+            (add X rule)))
+        ;; check for epsilon production
+        (when (member *empty* first-for-production)
+          (let ((follow-for-production (gethash (first rule) follow-table)))
+            (dolist (Y follow-for-production)
+              (when (member Y (grammar-terminals grammar))
+                (add Y rule)))
+            (when (member *end* follow-for-production)
+              (add *end* rule)))))))
+    ll0-table))
+
+
+
 ;;
 ;; Tests
 ;;
 
 (defun test-create-first-table0()
-  (let ((first-table (create-first-table *terminals* *nonterminals* *grammar*)))
-    (dolist (X *nonterminals*)
+  (let ((first-table (create-first-table *grammar-0*)))
+    (dolist (X (grammar-nonterminals *grammar-0*))
       (format t "term = ~a: " X)
       (print
        (first-function X first-table))
@@ -410,17 +457,17 @@ with conjunction with first-function"
 
 
 (defun test-create-first-table1()
-  (let ((first-table (create-first-table *terminals1* *nonterminals1* *grammar1*)))
-    (dolist (X *nonterminals1*)
+  (let ((first-table (create-first-table *grammar-1*)))
+    (dolist (X (grammar-nonterminals *grammar-1*))
       (format t "term = ~a: " X)
       (print
        (first-function X first-table))
         (format t "~%"))))
 
 (defun test-create-first-table2()
-  (let ((first-table (create-first-table *terminals2* *nonterminals2* *grammar2*)))
+  (let ((first-table (create-first-table *grammar-2*)))
     (dolist (X
-              (append *nonterminals2*
+              (append (grammar-nonterminals *grammar-2*)
                       (list 
                        (list 'S 'E) ;;FIRST(SE)  = {a,b}
                        (list 'b 'E 'c);;  FIRST(bEc) = {b}
@@ -431,3 +478,30 @@ with conjunction with first-function"
         (format t "~%"))))
 
 
+(defun test-ll0-table-grammar0()
+  (let ((ll-table (create-ll0-table *grammar-0*))
+        (terminals+end (append (grammar-terminals *grammar-0*) (list *end*)))
+        (nonterminals (grammar-nonterminals *grammar-0*)))
+    (dolist (X nonterminals)
+      (dolist (Y terminals+end)
+        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+      (format t "~%"))))
+
+(defun test-ll0-table-grammar1()
+  (let ((ll-table (create-ll0-table *grammar-1*))
+        (terminals+end (append (grammar-terminals *grammar-1*) (list *end*)))
+        (nonterminals (grammar-nonterminals *grammar-1*)))
+    (dolist (X nonterminals)
+      (dolist (Y terminals+end)
+        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+      (format t "~%"))))
+
+(defun test-ll0-table-grammar2()
+  (let ((ll-table (create-ll0-table *grammar-2*))
+        (terminals+end (append (grammar-terminals *grammar-2*) (list *end*)))
+        (nonterminals (grammar-nonterminals *grammar-2*)))
+    (dolist (X nonterminals)
+      (dolist (Y terminals+end)
+        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+      (format t "~%"))))
+        
