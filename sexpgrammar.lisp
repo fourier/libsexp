@@ -110,7 +110,6 @@ If item is a list do the same for all its elements. Returns the new list"
           result))))
 
 
-
 (defun pretty-print-rule (R)
   "Pretty-print the rule R"
   (let ((rule-nonterminal (first R))
@@ -128,11 +127,16 @@ If item is a list do the same for all its elements. Returns the new list"
               (format t "~a" X))))
     (format t "~%")))
 
+(defun print-grammar (grammar)
+  (let ((rules (grammar-rules grammar)))
+           (dotimes (i (length rules))
+             (format t "(~d) ~a" i (nth i rules))
+             (format t "~%"))))
 
 (defun print-items (items-list)
-  (dolist (I items-list)
-    (format t "---------------~%")
-    (dolist (X I)
+  (dotimes (i (length items-list))
+    (format t "I~d: ~%" i)
+    (dolist (X (nth i items-list))
       (pretty-print-rule X))))
 
 
@@ -242,6 +246,7 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
         (when (listp production)
           (let ((found (member +dot+ production)))
             (when (and found
+                       ;; at least one symbol after dot
                        (> (length found) 1)
                        (eq (second found) X))
               (setf goto-list (push-back R goto-list)))))))
@@ -250,7 +255,7 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
         (let ((rule (move-dot-to-right R)))
           (when rule
             (setf result-list
-                  (append result-list (closure grammar (list (move-dot-to-right R)))))))))
+                  (append result-list (closure grammar (list rule))))))))
     result-list))
 
 ;; auxulary function - remove later if not needed
