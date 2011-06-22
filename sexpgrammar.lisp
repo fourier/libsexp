@@ -50,18 +50,18 @@
 ;; grammar 2 - SEXP - for lisp(scheme) syntax
 
 (defparameter *grammar-2* (make-grammar
-                           :terminals (list 'a '\( '\))
+                           :terminals (list 'atom 'OpenParen 'CloseParen)
                            :nonterminals (list 'S1 'S 'E 'L)
                            :start-symbol 'S1
                            :rules
                            (list
                             (list 'S1 'S)
-                            (list 'S 'a)                   ; S -> a
+                            (list 'S 'atom)                ; S -> atom
                             (list 'S 'L)                   ; S -> L
                             (list 'E 'S)                   ; E -> S
                             (list 'E (list 'S 'E))         ; E -> SE
-                            (list 'L (list '\( '\)))       ;L -> ()
-                            (list 'L (list '\( 'E '\)))))) ; L -> (E)
+                            (list 'L (list 'OpenParen 'CloseParen))       ;L -> ()
+                            (list 'L (list 'OpenParen 'E 'CloseParen))))) ; L -> (E)
 
 ;; grammar 3 - from wikipedia article about LR0 parsers
 
@@ -110,22 +110,51 @@ If item is a list do the same for all its elements. Returns the new list"
           result))))
 
 
+(defun string-replace (str1 sub1 sub2)
+  "Replaces the occurence of sub1 in str1 with sub2"
+  (let ((str1 (string str1))
+        (str2 "")
+        (sub1 (string sub1))
+        (sub2 (string sub2))
+        (index1 0))
+    (loop
+       (if (string-equal str1 sub1
+                         :start1 index1
+                         :end1 (min (length str1)
+                                    (+ index1 (length sub1))))
+           (progn
+             (setq str2 (concatenate 'string str2 sub2))
+             (incf index1 (length sub1)))
+           (progn
+             (setq str2 (concatenate 'string
+                                     str2
+                                     (subseq str1 index1 (1+ index1))))
+             (incf index1)))
+       (unless (< index1 (length str1))
+         (return str2)))))
+
 (defun pretty-print-rule (R)
   "Pretty-print the rule R"
+  (format t "~a" (pretty-print-rule-to-string R))
+  (format t "~%"))
+
+(defun pretty-print-rule-to-string (R)
+  "Pretty print rule to the string (as a return value)"
   (let ((rule-nonterminal (first R))
         (rule (second R)))
-    ;; print the rule leading nonterminal (left part)
-    (format t "~a -> " rule-nonterminal)
-    (if (atom rule)
-        ;; if atom just print it
-        (format t "~a" rule)
-        ;; if list walk through the list and print element
-        (dolist (X rule)
-          ;; in case if it is a dot print '.' instead
-          (if (eq X +dot+)
-              (format t ".")
-              (format t "~a" X))))
-    (format t "~%")))
+    (with-output-to-string (str)
+      ;; print the rule leading nonterminal (left part)
+      (format str "~a -> " rule-nonterminal)
+      (if (atom rule)
+          ;; if atom just print it
+          (format str "~a" rule)
+          ;; if list walk through the list and print element
+          (dolist (X rule)
+            ;; in case if it is a dot print '.' instead
+            (if (eq X +dot+)
+                (format str ".")
+                (format str "~a " X))))
+    str)))
 
 (defun print-grammar (grammar)
   (let ((rules (grammar-rules grammar)))
@@ -656,4 +685,170 @@ with conjunction with first-function"
       (dolist (X terminals)
         (format t "~a " (gethash X (aref (parse-table-action-table table) i))))
       (format t "~%"))))
+    
+(defun print-slr-table-and-grammar-to-file (grammar table filename)
+  (labels ((enum-formatting-function (x)
+             (concatenate 'string "E" (symbol-name x)))
+           (enum-nonterm-formatting-function (x)
+             (concatenate 'string "ENONTERM_" (symbol-name x)))
+           (enum-formatter (stream enum-name enum-list)
+             (format stream "typedef enum~%{~%")
+             (format stream "~{  ~a~^,~%~}~%} ~a;~%~%"
+                     enum-list enum-name))
+           (array-formatter-decl (stream arr-name arr-list &key (type "int"))
+             (let ((arr-size-string
+                    (concatenate 'string (string-upcase arr-name) "_SIZE")))
+               (format stream "#define ~a ~d~%" arr-size-string (length arr-list))
+               (let ((s
+                      (with-output-to-string (str)
+                        (format str "const ~a ~a[~a]"
+                                type arr-name arr-size-string))))
+                 (format stream "extern ~a;~%~%" s)
+                 s)))
+           (array2-formatter-decl (stream arr-name arr-type arr-list)
+             (let ((arr-size-string
+                    (concatenate 'string (string-upcase arr-name) "_SIZE")))
+               (format stream "#define ~a ~d~%" arr-size-string (length arr-list))
+               (let ((s
+                      (with-output-to-string (str)
+                        (format str "const ~a ~a[][~a]"
+                                arr-type arr-name arr-size-string))))
+                 (format stream "extern ~a;~%~%" s)
+                 s)))
+           (array-to-string (arr)
+             (with-output-to-string (str)
+               (format str "{~{~a~^, ~}};~%~%"
+                       arr)))
+           (rule-to-string (R)
+             (with-output-to-string (str)
+               (format str "{~a, ~d, \"~a\"}"
+                       (enum-nonterm-formatting-function (first R))
+                       (if (listp (second R))
+                           (length (second R))
+                           1)
+                       (pretty-print-rule-to-string R))))
+           (action-formatter (action)
+             (with-output-to-string (str)
+               (cond ((null action)
+                      (format str "{~a, -1}" (enum-formatting-function 'Invalid)))
+                     ((string= action "acc")
+                      (format str "{~a, 0}" (enum-formatting-function 'Accept)))
+                     ((char= #\s (char action 0))
+                      (format str "{~a, ~d}"
+                              (enum-formatting-function 'Shift)
+                              (parse-integer action :start 1)))
+                     ((char= #\r (char action 0))
+                      (format str "{~a, ~d}"
+                              (enum-formatting-function 'Reduce)
+                              (parse-integer action :start 1)))))))
+    (let* ((filename-header (concatenate 'string filename ".h"))
+           (filename-source (concatenate 'string filename ".c"))
+           (enum-terminals (mapcar #'enum-formatting-function
+                                (append (grammar-terminals grammar)
+                                        (list 'end))))
+           (enum-nonterminals (mapcar #'enum-nonterm-formatting-function
+                                (grammar-nonterminals grammar)))
+           (include-guard
+            (format nil "__~a__" (string-upcase
+                                  (string-replace
+                                   (file-namestring filename-header) "." "_"))))
+           (declarations (make-hash-table)))
+      (with-open-file (header (merge-pathnames filename-header)
+                              :direction :output
+                              :if-exists :supersede)
+        (format header "/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */~%")
+        ;; opening include-guard
+        (format header "#ifndef ~a~%#define ~a~%~%" include-guard include-guard)
+        (enum-formatter header "ParserState"
+                        (mapcar #'enum-formatting-function
+                                (list 'Invalid 'Shift 'Reduce 'Accept)))
+        ;; declaration of the action table element
+        ;; terminals enum
+        (enum-formatter header "TerminalType" enum-terminals)
+        ;; nonterminals enum
+        (enum-formatter header "NonterminalType" enum-nonterminals)
+        (format header
+                "~%typedef struct~%{~%  ParserState type;~%  int number;~%} action;~%~%")
+        (format header
+                "typedef struct~%{~%  NonterminalType start_symbol;~%  int size;~%  const char* print_form;~%} grammar_rule;~%~%")
+        ;; lists of terminals and nonterminals
+        (setf (gethash 'terminals-list declarations)
+              (array-formatter-decl header "terminals_list" enum-terminals))
+        (setf (gethash 'nonterminals-list declarations)
+              (array-formatter-decl header "nonterminals_list" enum-nonterminals))
+        ;; list of grammar rules
+        (setf (gethash 'grammar-rules declarations)
+              (array-formatter-decl header "grammar_rules_list"
+                                    (grammar-rules grammar) :type "grammar_rule"));
+        ;; declaration of the ACTION table
+        (setf (gethash 'action-table declarations)
+              (array2-formatter-decl header "action_table" "action"
+                                     (append (grammar-terminals grammar)
+                                             (list +end+))))
+        ;; declaration of the GOTO table
+        (setf (gethash 'goto-table declarations)
+              (array2-formatter-decl header "goto_table" "int"
+                                     (grammar-nonterminals grammar)))
+        ;; closing include-guard
+        (format header "~%#endif /* ~a */~%" include-guard))
+      (with-open-file (source (merge-pathnames filename-source)
+                              :direction :output
+                              :if-exists :supersede)
+        (format source "/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */~%")
+        (format source "#include \"~a\"~%~%" (file-namestring filename-header))
+        ;; terminals
+        (format source "~a~%" (concatenate 'string
+                                           (gethash 'terminals-list declarations)
+                                           " = "
+                                           (array-to-string enum-terminals)))
+        ;; nonterminals
+        (format source "~a~%" (concatenate 'string
+                                           (gethash 'nonterminals-list declarations)
+                                           " = "
+                                           (array-to-string enum-nonterminals)))
+        (format source "~a~%" (concatenate 'string
+                                           (gethash 'grammar-rules declarations)
+                                           " = "
+                                           (with-output-to-string (str)
+                                             (format str "{~{~a~^, ~}};~%~%"
+                                                     (mapcar
+                                                      #'rule-to-string
+                                                      (grammar-rules grammar))))))
+        ;; action table
+        (let ((action-rows nil))
+          (dotimes (i (length (parse-table-action-table table)))
+            (push 
+             (with-output-to-string (str)
+               (let ((actions-list nil))
+                 (dolist (X (append (grammar-terminals grammar)
+                                    (list +end+)))
+                   (push
+                    (action-formatter 
+                     (gethash X (aref (parse-table-action-table table) i)))
+                   actions-list))
+                 (format str "{~{~a~^, ~}}" (reverse actions-list))))
+             action-rows))
+          (format source "~a =  ~%{~%" (gethash 'action-table declarations))
+          (format source "~{  ~a~^,~%~}" (reverse action-rows))
+          (format source "~%};~%~%"))
+        ;; goto table
+
+        (let ((goto-rows nil))
+          (dotimes (i (length (parse-table-goto-table table)))
+            (push
+             (with-output-to-string (str)
+               (let ((goto-list nil))
+                 (dolist (X (grammar-nonterminals grammar))
+                   (let ((goto-elt (gethash X (aref (parse-table-goto-table table) i))))
+                     (push
+                      (if goto-elt goto-elt -1)
+                      goto-list)))
+                 (format str "{~{~a~^, ~}}" (reverse goto-list))))
+             goto-rows))
+          (format source "~a = ~%{~%" (gethash 'goto-table declarations))
+          (format source "~{  ~a~^,~%~}" (reverse goto-rows))
+          (format source "~%};~%~%"))))))
+
+
+    
     

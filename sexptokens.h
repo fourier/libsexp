@@ -2,20 +2,11 @@
 #ifndef _SEXPTOKENS_H_
 #define _SEXPTOKENS_H_
 
+#include "sexpgrammar.h"
+
 /*
  * Type declarations
  */
-
-/*
- * Enum specifying top-level s-expression token types as
- * "(", ")", Atom
- */
-typedef enum
-{
-  EListOpenParen,
-  EListCloseParen,
-  EAtom
-} SexpTokenType;
 
 /*
  * Enum specifying atom-level token types as
@@ -45,7 +36,7 @@ typedef struct
 /* Structure holding top-level s-expression tokens*/
 typedef struct
 {
-  SexpTokenType type;
+  TerminalType type;
   atom_token* atom;
 } sexp_token;
 
@@ -74,7 +65,7 @@ void atom_token_print(atom_token* token);
 
 
 /* Allocate memory for sexp token end empty necessary fields */
-sexp_token* sexp_token_alloc(SexpTokenType type);
+sexp_token* sexp_token_alloc(TerminalType type);
 
 /* Free allocated memort for Sexp token */
 sexp_token* sexp_token_free(sexp_token* token);

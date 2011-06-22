@@ -7,7 +7,7 @@
 #include "sexptokens.h"
 #include "sexplexer.h"
 #include "sexpcontainers.h"
-
+#include "sexpparser.h"
 
 int main ()
 {
@@ -49,6 +49,9 @@ int main ()
   char* p;
   sexp_token_cont_item *head, *top;
   sexp_token* token;
+  parser_stack* pstack;
+  parser_stack_item pstack_item;
+  
   /* test floats */
   ptr = float_examples;
   while (*ptr)
@@ -86,11 +89,11 @@ int main ()
 
   printf ("===============================================================\n");
   /* create a list: '(', 0, ')' */
-  head = sexp_token_cont_alloc(sexp_token_alloc(EListOpenParen));
+  head = sexp_token_cont_alloc(sexp_token_alloc(EOPENPAREN));
   top = sexp_token_list_add(head,
-                            sexp_token_alloc(EAtom));
+                            sexp_token_alloc(EATOM));
   top = sexp_token_list_add(head,
-                            sexp_token_alloc(EListCloseParen));
+                            sexp_token_alloc(ECLOSEPAREN));
   top = head;
   while(top)
   {
@@ -131,6 +134,21 @@ int main ()
     top = sexp_token_stack_pop(top);
   }
   printf("\n");
+
+  /* test parser stack */
+  pstack = parser_stack_alloc();
+
+  pstack_item.type = EStackItemTerminal;
+  parser_stack_push(pstack, pstack_item);
+  pstack_item.type = EStackItemNonterminal;
+  parser_stack_push(pstack, pstack_item);
+  pstack_item.type = EStackItemNonterminal;
+
+  parser_stack_pop(pstack,&pstack_item);
+  parser_stack_pop(pstack,&pstack_item);
+  parser_stack_pop(pstack,&pstack_item);
+  
+  pstack = parser_stack_free(pstack);
   
   return 0;
 }

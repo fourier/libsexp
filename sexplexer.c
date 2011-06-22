@@ -14,18 +14,18 @@ sexp_token* read_sexp_token(char** str)
     switch (*ptr)
     {
     case '(':
-      token = sexp_token_alloc(EListOpenParen);
+      token = sexp_token_alloc(EOPENPAREN);
       ptr++;
       break;
     case ')':
-      token = sexp_token_alloc(EListCloseParen);
+      token = sexp_token_alloc(ECLOSEPAREN);
       ptr++;
       break;
     default:
       atom = read_atom_token(&ptr);
       if ( atom )               /* parsed successfully */
       {
-        token = sexp_token_alloc(EAtom);
+        token = sexp_token_alloc(EATOM);
         token->atom = atom;
       }
       break;

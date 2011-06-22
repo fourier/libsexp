@@ -137,7 +137,7 @@ void atom_token_print(atom_token* token)
 
 
 
-sexp_token* sexp_token_alloc(SexpTokenType type)
+sexp_token* sexp_token_alloc(TerminalType type)
 {
   sexp_token* token = calloc(1, sizeof(sexp_token));
   if (token)
@@ -152,11 +152,12 @@ sexp_token* sexp_token_free(sexp_token* token)
   {
     switch (token->type)
     {
-    case EAtom:
+    case EATOM:
       token->atom = atom_token_free(token->atom);
       break;
-    case EListOpenParen:
-    case EListCloseParen:
+    case EOPENPAREN:
+    case ECLOSEPAREN:
+    case EEND:
     default:
       break;
     }
@@ -172,17 +173,18 @@ void sexp_token_verbose_print(sexp_token* token)
   {
     switch ( token->type)
     {
-    case EListOpenParen:
+    case EOPENPAREN:
       printf("type: OpenParen\n");
       printf("value: '('\n");
       break;
-    case EListCloseParen:
+    case ECLOSEPAREN:
       printf("type: CloseParen\n");
       printf("value: ')'\n");
       break;
-    case EAtom:
+    case EATOM:
       atom_token_verbose_print(token->atom);
       break;
+    case EEND:
     default:
       break;
     }
@@ -195,16 +197,18 @@ void sexp_token_print(sexp_token* token)
   {
     switch ( token->type)
     {
-    case EListOpenParen:
+    case EOPENPAREN:
       printf("( ");
       break;
-    case EListCloseParen:
+    case ECLOSEPAREN:
       printf(") ");
       break;
-    case EAtom:
+    case EATOM:
       atom_token_print(token->atom);
       printf(" ");
       break;
+    case EEND:
+      printf("$");
     default:
       break;
     }
