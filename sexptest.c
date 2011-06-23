@@ -38,7 +38,7 @@ int main ()
   
   char* string_examples[] = {"\"hello world 111\"",
                              "\"\"",
-                             "\"this is a string with \\\"escaped\\\" substring\"",
+                             "\"this is a string with \\\"escaped\\\" sustr\"",
                              0};
   char* s_expression_example = " (defun factorial (x) \
    (if (zerop x) \
@@ -149,7 +149,18 @@ int main ()
   parser_stack_pop(pstack,&pstack_item);
   
   pstack = parser_stack_free(pstack);
+
+  /* test the parser function */
+  p = "(setf a (+ 1 2 ))";
+  token = read_sexp_token(&p);  
+  if (token)
+    head = sexp_token_cont_alloc(token);
+  while ( (token = read_sexp_token(&p)))
+    sexp_token_list_add(head,token);
+
+  sexp_parser(head);
   
+  head = sexp_token_cont_list_free(head);
   return 0;
 }
 

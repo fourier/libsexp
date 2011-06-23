@@ -49,11 +49,13 @@ extern const int nonterminals_list[NONTERMINALS_LIST_SIZE];
 #define GRAMMAR_RULES_LIST_SIZE 7
 extern const grammar_rule grammar_rules_list[GRAMMAR_RULES_LIST_SIZE];
 
-#define ACTION_TABLE_SIZE 4
-extern const action action_table[][ACTION_TABLE_SIZE];
+#define ACTION_TABLE_ROWS 10
+#define ACTION_TABLE_COLS 4
+extern const action action_table[ACTION_TABLE_ROWS][ACTION_TABLE_COLS];
 
-#define GOTO_TABLE_SIZE 4
-extern const int goto_table[][GOTO_TABLE_SIZE];
+#define GOTO_TABLE_ROWS 10
+#define GOTO_TABLE_COLS 4
+extern const int goto_table[GOTO_TABLE_ROWS][GOTO_TABLE_COLS];
 
 
 #endif /* __SEXPGRAMMAR_H__ */

@@ -705,14 +705,17 @@ with conjunction with first-function"
                                 type arr-name arr-size-string))))
                  (format stream "extern ~a;~%~%" s)
                  s)))
-           (array2-formatter-decl (stream arr-name arr-type arr-list)
-             (let ((arr-size-string
-                    (concatenate 'string (string-upcase arr-name) "_SIZE")))
-               (format stream "#define ~a ~d~%" arr-size-string (length arr-list))
+           (array2-formatter-decl (stream arr-name arr-type rows-list cols-list)
+             (let ((rows-string
+                    (concatenate 'string (string-upcase arr-name) "_ROWS"))
+                   (cols-string
+                    (concatenate 'string (string-upcase arr-name) "_COLS")))
+               (format stream "#define ~a ~d~%" rows-string (length rows-list))
+               (format stream "#define ~a ~d~%" cols-string (length cols-list))
                (let ((s
                       (with-output-to-string (str)
-                        (format str "const ~a ~a[][~a]"
-                                arr-type arr-name arr-size-string))))
+                        (format str "const ~a ~a[~a][~a]"
+                                arr-type arr-name rows-string cols-string))))
                  (format stream "extern ~a;~%~%" s)
                  s)))
            (array-to-string (arr)
@@ -783,11 +786,13 @@ with conjunction with first-function"
         ;; declaration of the ACTION table
         (setf (gethash 'action-table declarations)
               (array2-formatter-decl header "action_table" "action"
+                                     (parse-table-action-table table)
                                      (append (grammar-terminals grammar)
                                              (list +end+))))
         ;; declaration of the GOTO table
         (setf (gethash 'goto-table declarations)
               (array2-formatter-decl header "goto_table" "int"
+                                     (parse-table-goto-table table)
                                      (grammar-nonterminals grammar)))
         ;; closing include-guard
         (format header "~%#endif /* ~a */~%" include-guard))
