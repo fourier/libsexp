@@ -54,6 +54,12 @@ int parser_stack_pop(parser_stack* stack, parser_stack_item* item);
  */
 parser_stack_item* parser_stack_peek(parser_stack* stack);
 
-sexp_item* sexp_parser(sexp_token_cont_item* head);
+/*
+ * Parse the list of token started by head
+ * if do_print != print the parse rules button-up
+ * returns sexp_itep pointing to the root of the parse tree
+ * returns 0 in case of parse errors
+ */
+sexp_item* sexp_parse(sexp_token_cont_item* head, int do_print);
 
 #endif /* _SEXPPARSER_H_ */

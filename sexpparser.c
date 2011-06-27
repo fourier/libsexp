@@ -37,6 +37,7 @@ parser_stack* parser_stack_free(parser_stack* stack)
       sexp_item_free(stack->items[stack->top].item_value);
     }
     free(stack->items);
+    free(stack);
   }
   return (parser_stack*)0;
 }
@@ -103,9 +104,8 @@ static parser_stack_item* parser_stack_peek_state(parser_stack* stack)
  * items - array of values for every reduced symbol
  * size - items size
  */
-static sexp_item* handle_rule_reduction(int rule, sexp_item** items, int size)
+static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
 {
-  int i;
   sexp_item* result = 0;
   /* for ( i = 0; i < size; ++ i) */
   /*   if (items[i] && items[i]->type == EAtom) */
@@ -124,18 +124,26 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items, int size)
   case 1:
   case 2:
     result = items[0];
+    /* take ownership */
+    items[0] = 0;
     break;
   case 3:
     result = sexp_item_create_cons(items[0],0);
+    /* take ownership */
+    items[0] = 0;
     break;
   case 4:
-    assert(items[1]->type == ECons);
-    result = sexp_item_create_cons(items[0],items[1]->value.cons);
+    assert(!items[1]->atom);
+    result = sexp_item_create_cons(items[0],items[1]);
+    /* take ownership */
+    items[0] = items[1] = 0;
     break;
   case 5:
     break;
   case 6:
     result = items[1];
+    /* take ownership */
+    items[1] = 0;
     break;
   case 0:
   default:
@@ -145,9 +153,7 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items, int size)
   return result;
 }
 
-
-
-sexp_item* sexp_parser(sexp_token_cont_item* head)
+sexp_item* sexp_parse(sexp_token_cont_item* head, int do_print)
 {
   sexp_item *result = 0;
   parser_stack* stack = parser_stack_alloc();
@@ -185,12 +191,9 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
       parser_stack_pop(stack,&item);
       result = parser_stack_peek(stack)->item_value;
       parser_stack_peek(stack)->item_value = 0;
-      printf("parser finished successfully\n");
       do_exit = 1;
       break;
     case EINVALID:
-      /* parser_stack_pop(stack,&item);         */
-      printf("parser finished in invalid state\n");
       do_exit = 1;
       break;
     case ESHIFT:              /* shift to the state 'number' */
@@ -215,10 +218,12 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
         }
       }
       /* handle grammar rule */
-      item_value = handle_rule_reduction(number,
-                                         items,
-                                         grammar_rules_list[number].size);
+      item_value = handle_rule_reduction(number, items);
+      /* clear all unused items */
+      for ( i = 0; i < grammar_rules_list[number].size; ++ i)
+        sexp_item_free(items[i]);
       free(items);
+      
       /* get current state into the number */
       pitem = parser_stack_peek_state(stack);
       i = pitem->value;
@@ -229,7 +234,8 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
                         item_value);
       /* push the GOTO(i,A) to the stack (as a state) */
       PUSH_PARSER_STACK(EStackItemState,goto_table[i][A],0);
-      printf("%s\n",grammar_rules_list[number].print_form);
+      if (do_print)
+        printf("%s\n",grammar_rules_list[number].print_form);
       /*  */
       break;
     default:

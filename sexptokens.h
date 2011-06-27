@@ -40,37 +40,14 @@ typedef struct
   atom_token* atom;
 } sexp_token;
 
-/*
- * Set of structures represening concrete SEXP elements:
- * they can be of 2 types, ATOMs or CONSes
- */
-
-/* types of the SEXP: ATOM or CONS */
-typedef enum
-{
-  EAtom = EATOM,
-  ECons
-} SexpValueType;
-
 /* struct representing SEXP item: ATOM or CONS */
 typedef struct sexp_item_tag
 {
-  SexpValueType type;
-  int _visited;
-  union
-  {
-    atom_token* atom;
-    struct sexp_cons_tag* cons;
-  } value;
+  atom_token* atom;             /* if not empty - ATOM */
+  /* otherwise CONS */
+  struct sexp_item_tag* car;
+  struct sexp_item_tag* cdr;
 } sexp_item;
-
-/* struct representing CONS */
-typedef struct sexp_cons_tag
-{
-  sexp_item* car;
-  struct sexp_cons_tag* cdr;
-} sexp_cons;
-
 
 /*
  * Function declarations
@@ -115,19 +92,15 @@ void sexp_token_verbose_print(sexp_token* token);
 void sexp_token_print(sexp_token* token);
 
 /*
- * Funcitons operating with CONSes and sexp_items
+ * Funcitons operating with sexp_items
  */
 
-sexp_cons* sexp_cons_alloc(sexp_item* car, sexp_cons* cdr);
-sexp_cons* sexp_cons_free(sexp_cons* cons);
-
+/* create sexp_item from token, taking ownership of the atom */
 sexp_item* sexp_item_create_atom(sexp_token* from);
-sexp_item* sexp_item_create_cons(sexp_item* car, sexp_cons* cdr);
-sexp_item* sexp_item_create_cons_plain(sexp_cons* cons);
+sexp_item* sexp_item_create_cons(sexp_item* car, sexp_item* cdr);
 sexp_item* sexp_item_free(sexp_item* item);
-
 sexp_item* sexp_item_car(sexp_item* item);
-sexp_cons* sexp_item_cdr(sexp_item* item);
+sexp_item* sexp_item_cdr(sexp_item* item);
 
 /* verbose print sexp_item as a CONS chain */
 void sexp_item_print(sexp_item* item);

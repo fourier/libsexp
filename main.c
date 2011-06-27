@@ -6,7 +6,7 @@
 #include "sexplexer.h"
 #include "sexpparser.h"
 
-const int block_size = 10;
+const int block_size = 255;
 
 int main(int argc, const char* argv[])
 {
@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
     file = fopen(argv[1],"rt");
 
   /* read file contents  */
-  while(!feof(stdin))
+  while(!feof(file))
   {
     read_chunk = fread(read_buffer+read,1,block_size, file);
     read += read_chunk;
@@ -55,14 +55,13 @@ int main(int argc, const char* argv[])
     sexp_token_list_add(head,token);
 
   /* 2. Parser */
-  sexp = sexp_parser(head);
+  sexp = sexp_parse(head,1);
   /* 3. Print output */
   sexp_item_print(sexp);
-  
   /* free allocated memory */
+  sexp = sexp_item_free(sexp);
   free(read_buffer);    
   head = sexp_token_cont_list_free(head);
-  
   
   return 0;
 }
