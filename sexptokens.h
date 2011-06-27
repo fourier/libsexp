@@ -56,6 +56,7 @@ typedef enum
 typedef struct sexp_item_tag
 {
   SexpValueType type;
+  int _visited;
   union
   {
     atom_token* atom;
@@ -87,9 +88,6 @@ atom_token* atom_token_integer_alloc(char* begin, char* end);
 atom_token* atom_token_float_alloc(char* begin, char* end);
 atom_token* atom_token_string_alloc(char* begin, char* end);
 atom_token* atom_token_symbol_alloc(char* begin, char* end);
-
-/* Clone the token */
-atom_token* atom_token_clone(atom_token* token);
 
 /* Free allocated memory for Atom token */
 atom_token* atom_token_free(atom_token* token);
@@ -123,7 +121,7 @@ void sexp_token_print(sexp_token* token);
 sexp_cons* sexp_cons_alloc(sexp_item* car, sexp_cons* cdr);
 sexp_cons* sexp_cons_free(sexp_cons* cons);
 
-sexp_item* sexp_item_create_atom(atom_token* original);
+sexp_item* sexp_item_create_atom(sexp_token* from);
 sexp_item* sexp_item_create_cons(sexp_item* car, sexp_cons* cdr);
 sexp_item* sexp_item_create_cons_plain(sexp_cons* cons);
 sexp_item* sexp_item_free(sexp_item* item);

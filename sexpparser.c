@@ -32,6 +32,10 @@ parser_stack* parser_stack_free(parser_stack* stack)
 {
   if (stack)
   {
+    while(stack->top--)
+    {
+      sexp_item_free(stack->items[stack->top].item_value);
+    }
     free(stack->items);
   }
   return (parser_stack*)0;
@@ -45,7 +49,7 @@ void parser_stack_push(parser_stack* stack, parser_stack_item item)
   {
     stack->items = calloc(parser_stack_step,sizeof(parser_stack_item));
     stack->items[0] = item;
-    stack->allocated = parser_stack_step;
+    stack->_allocated = parser_stack_step;
     /* top is always pointing to the next item */
     stack->top = 1;
   }
@@ -53,7 +57,7 @@ void parser_stack_push(parser_stack* stack, parser_stack_item item)
   else
   {
     /* if there is no need to reallocate stack */
-    if ( stack->top < stack->allocated)
+    if ( stack->top < stack->_allocated)
     {
       stack->items[stack->top++] = item;
     }
@@ -62,8 +66,8 @@ void parser_stack_push(parser_stack* stack, parser_stack_item item)
     {
       stack->items =
         (parser_stack_item*)realloc(stack->items,
-                                    stack->allocated + parser_stack_step);
-      stack->allocated += parser_stack_step;
+                                    stack->_allocated + parser_stack_step);
+      stack->_allocated += parser_stack_step;
       stack->items[stack->top++] = item;
     }
   }
@@ -165,7 +169,7 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
     /* get the value of the stack item. it shall be the parser state */
     pitem = parser_stack_peek_state(stack);
     /* calculate colum */
-    column = current ? current->token->type : EEND;
+    column = current ? current->value->type : EEND;
     /* get action from the action table */
     action_type = action_table[pitem->value][column].type;
     number = action_table[pitem->value][column].number;
@@ -180,6 +184,7 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
     case EACCEPT:
       parser_stack_pop(stack,&item);
       result = parser_stack_peek(stack)->item_value;
+      parser_stack_peek(stack)->item_value = 0;
       printf("parser finished successfully\n");
       do_exit = 1;
       break;
@@ -191,8 +196,8 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
     case ESHIFT:              /* shift to the state 'number' */
       /* push current terminal and state to the stack */
       PUSH_PARSER_STACK(EStackItemTerminal,
-                        current->token->type,
-                        sexp_item_create_atom(current->token->atom));
+                        current->value->type,
+                        sexp_item_create_atom(current->value));
       PUSH_PARSER_STACK(EStackItemState,number,0);
       current = current->next;
       break;
@@ -213,6 +218,7 @@ sexp_item* sexp_parser(sexp_token_cont_item* head)
       item_value = handle_rule_reduction(number,
                                          items,
                                          grammar_rules_list[number].size);
+      free(items);
       /* get current state into the number */
       pitem = parser_stack_peek_state(stack);
       i = pitem->value;

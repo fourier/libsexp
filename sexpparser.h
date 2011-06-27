@@ -24,7 +24,7 @@ typedef struct
 {
   int top;
   /* do not use this field! */
-  int allocated;
+  int _allocated;
   parser_stack_item* items;
 } parser_stack;
 

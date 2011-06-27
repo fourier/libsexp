@@ -16,34 +16,6 @@ atom_token* atom_token_alloc(AtomTokenType type)
   return token;
 }
 
-atom_token* atom_token_clone(atom_token* token)
-{
-  atom_token* result = 0;
-  if ( token )
-  {
-    result = atom_token_alloc(token->type);
-    switch (token->type)
-    {
-    case EString:
-      result->value.string = strdup(token->value.string);
-      break;
-    case ESymbol:
-      result->value.symbol = strdup(token->value.symbol);
-      break;
-    case EIntegerNumber:
-      result->value.int_number = token->value.int_number;
-      break;
-    case EFloatNumber:
-      result->value.float_number = token->value.float_number;
-      break;
-    default:
-      break;
-    }
-  }
-  return result;
-}
-
-
 atom_token* atom_token_free(atom_token* token)
 {
   if (token)
@@ -277,11 +249,12 @@ sexp_cons* sexp_cons_free(sexp_cons* cons)
 }
 
 
-sexp_item* sexp_item_create_atom(atom_token* original)
+sexp_item* sexp_item_create_atom(sexp_token* from)
 {
   sexp_item* result = calloc(sizeof(sexp_item),1);
   result->type = EAtom;
-  result->value.atom = atom_token_clone(original);
+  result->value.atom = from->atom;
+  from->atom = 0;
   return result;
 }
 
@@ -305,6 +278,7 @@ sexp_item* sexp_item_create_cons_plain(sexp_cons* cons)
   return result;
 }
 
+#if 0
 sexp_item* sexp_item_free(sexp_item* item)
 {
   if (item)
@@ -324,6 +298,27 @@ sexp_item* sexp_item_free(sexp_item* item)
   }
   return (sexp_item*)0;
 }
+#endif
+sexp_item* sexp_item_free(sexp_item* item)
+{
+  if (item)
+  {
+    switch(item->type)
+    {
+    case EAtom:
+      atom_token_free(item->value.atom);
+      break;
+    case ECons:
+      
+      break;
+    default:
+      break;
+    }
+    free(item);
+  }
+  return (sexp_item*)0;
+}
+    
 
 sexp_item* sexp_item_car(sexp_item* item)
 {
