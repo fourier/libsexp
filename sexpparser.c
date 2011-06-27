@@ -107,9 +107,9 @@ static parser_stack_item* parser_stack_peek_state(parser_stack* stack)
 static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
 {
   sexp_item* result = 0;
-  /* for ( i = 0; i < size; ++ i) */
-  /*   if (items[i] && items[i]->type == EAtom) */
-  /*     atom_token_print(items[i]->value.atom); */
+  sexp_token* nil_token = sexp_token_alloc(EATOM,atom_token_alloc(ENil));
+  sexp_item* nil = sexp_item_create_atom(nil_token);
+  sexp_token_free(nil_token);
   /*
    * Rules:
    * (1) S -> atom: S.val = atom
@@ -128,9 +128,10 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
     items[0] = 0;
     break;
   case 3:
-    result = sexp_item_create_cons(items[0],0);
+    result = sexp_item_create_cons(items[0],nil);
     /* take ownership */
     items[0] = 0;
+    nil = 0;
     break;
   case 4:
     assert(!items[1]->atom);
@@ -139,6 +140,8 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
     items[0] = items[1] = 0;
     break;
   case 5:
+    result = nil;
+    nil = 0;
     break;
   case 6:
     result = items[1];
@@ -150,6 +153,7 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
     assert(0);
     break;
   }
+  sexp_item_free(nil);
   return result;
 }
 

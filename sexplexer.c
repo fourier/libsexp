@@ -14,20 +14,17 @@ sexp_token* read_sexp_token(char** str)
     switch (*ptr)
     {
     case '(':
-      token = sexp_token_alloc(EOPENPAREN);
+      token = sexp_token_alloc(EOPENPAREN,0);
       ptr++;
       break;
     case ')':
-      token = sexp_token_alloc(ECLOSEPAREN);
+      token = sexp_token_alloc(ECLOSEPAREN,0);
       ptr++;
       break;
     default:
       atom = read_atom_token(&ptr);
       if ( atom )               /* parsed successfully */
-      {
-        token = sexp_token_alloc(EATOM);
-        token->atom = atom;
-      }
+        token = sexp_token_alloc(EATOM,atom);
       break;
     }
   }
@@ -77,6 +74,17 @@ static atom_token* read_atom_token_string(char** str)
   return token;
 }
 
+/* return nonzero if string is NIL */
+static int check_if_nil(char* begin, char* end)
+{
+  int result = 0;
+  if ( end - begin == 3)
+    result = (begin[0] == 'N' || begin[0] == 'n')
+      && (begin[1] == 'I' || begin[1] == 'i')
+      && (begin[2] == 'L' || begin[2] == 'l');
+  return result;
+}
+
 static atom_token* read_atom_token_symbol(char** str)
 {
   atom_token* token = (atom_token*)0;
@@ -85,7 +93,8 @@ static atom_token* read_atom_token_symbol(char** str)
   {
     ptr = find_end_of_symbol(ptr);
     if ( ptr != *str)           /* symbol */
-      token = atom_token_symbol_alloc(*str,ptr);
+      token = check_if_nil(*str,ptr) ? atom_token_nil_alloc() : 
+        atom_token_symbol_alloc(*str,ptr);
     *str = ptr;
   }
   return token;
@@ -105,7 +114,7 @@ atom_token* read_atom_token(char** str)
       token = read_atom_token_float(&ptr);
     if (!token) /* 3) check if string */
       token = read_atom_token_string(&ptr);
-    if (!token) /* 4) check if symbol */
+    if (!token) /* 4) check if symbol or special(NIL) */
       token = read_atom_token_symbol(&ptr);
     *str = ptr;
   }

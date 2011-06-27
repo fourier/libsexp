@@ -17,7 +17,8 @@ typedef enum
   EIntegerNumber,
   EFloatNumber,
   EString,
-  ESymbol
+  ESymbol,
+  ENil
 } AtomTokenType;
 
 /* Structure holding atoms */
@@ -65,6 +66,7 @@ atom_token* atom_token_integer_alloc(char* begin, char* end);
 atom_token* atom_token_float_alloc(char* begin, char* end);
 atom_token* atom_token_string_alloc(char* begin, char* end);
 atom_token* atom_token_symbol_alloc(char* begin, char* end);
+atom_token* atom_token_nil_alloc();
 
 /* Free allocated memory for Atom token */
 atom_token* atom_token_free(atom_token* token);
@@ -80,7 +82,7 @@ void atom_token_print(atom_token* token);
  */
 
 /* Allocate memory for sexp token end empty necessary fields */
-sexp_token* sexp_token_alloc(TerminalType type);
+sexp_token* sexp_token_alloc(TerminalType type, atom_token* atom);
 
 /* Free allocated memort for Sexp token */
 sexp_token* sexp_token_free(sexp_token* token);

@@ -30,6 +30,7 @@ atom_token* atom_token_free(atom_token* token)
       break;
     case EIntegerNumber:
     case EFloatNumber:
+    case ENil:
     default:
       break;
     }
@@ -83,6 +84,12 @@ atom_token* atom_token_symbol_alloc(char* begin, char* end)
   return token;
 }
 
+atom_token* atom_token_nil_alloc()
+{
+  atom_token* token = atom_token_alloc(ENil);
+  return token;
+}
+
 void atom_token_verbose_print(atom_token* token)
 {
   if (token)
@@ -104,6 +111,10 @@ void atom_token_verbose_print(atom_token* token)
     case ESymbol:
       printf("type: Symbol\n");
       printf("value: %s\n",token->value.symbol);
+      break;
+    case ENil:
+      printf("type: Nil\n");
+      printf("value: NIL\n");
       break;
     default:
       break;
@@ -129,6 +140,8 @@ void atom_token_print(atom_token* token)
     case ESymbol:
       printf("%s",token->value.symbol);
       break;
+    case ENil:
+      printf("NIL");
     default:
       break;
     }
@@ -137,11 +150,11 @@ void atom_token_print(atom_token* token)
 
 
 
-sexp_token* sexp_token_alloc(TerminalType type)
+sexp_token* sexp_token_alloc(TerminalType type, atom_token* atom)
 {
   sexp_token* token = calloc(1, sizeof(sexp_token));
-  if (token)
-    token->type = type;
+  token->type = type;
+  token->atom = atom;
   return token;
 }
 
