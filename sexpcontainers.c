@@ -86,6 +86,7 @@ sexp_item_cont_item* sexp_item_stack_pop(sexp_item_cont_item* top,
   sexp_item_cont_item* result = top->next;
   *element = top->value;
   /* TODO: fix this deallocation! */
-  /* sexp_item_cont_item_free(top);   */
+  top->value = 0;
+  sexp_item_cont_item_free(top);
   return result;
 }
