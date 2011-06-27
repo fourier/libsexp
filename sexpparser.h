@@ -5,6 +5,7 @@
 #include "sexptokens.h"
 #include "sexpcontainers.h"
 
+
 typedef enum
 {
   EStackItemTerminal,
@@ -16,6 +17,7 @@ typedef struct
 {
   StackItemType type;
   int value;
+  sexp_item* item_value;
 } parser_stack_item;
 
 typedef struct
@@ -27,7 +29,9 @@ typedef struct
 } parser_stack;
 
 /* create parser stack item by given parameters */
-parser_stack_item parser_stack_item_create(StackItemType type, int value);
+parser_stack_item parser_stack_item_create(StackItemType type,
+                                           int value,
+                                           sexp_item* item_value);
 
 /* Allocate memory for the stack and initialize it with zeros */
 parser_stack* parser_stack_alloc();
@@ -50,6 +54,6 @@ int parser_stack_pop(parser_stack* stack, parser_stack_item* item);
  */
 parser_stack_item* parser_stack_peek(parser_stack* stack);
 
-void sexp_parser(sexp_token_cont_item* head);
+sexp_item* sexp_parser(sexp_token_cont_item* head);
 
 #endif /* _SEXPPARSER_H_ */

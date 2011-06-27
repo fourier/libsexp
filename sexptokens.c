@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include "sexptokens.h"
-
+#include "sexpcontainers.h"
 
 
 atom_token* atom_token_alloc(AtomTokenType type)
@@ -13,6 +14,33 @@ atom_token* atom_token_alloc(AtomTokenType type)
   if (token)
     token->type = type;
   return token;
+}
+
+atom_token* atom_token_clone(atom_token* token)
+{
+  atom_token* result = 0;
+  if ( token )
+  {
+    result = atom_token_alloc(token->type);
+    switch (token->type)
+    {
+    case EString:
+      result->value.string = strdup(token->value.string);
+      break;
+    case ESymbol:
+      result->value.symbol = strdup(token->value.symbol);
+      break;
+    case EIntegerNumber:
+      result->value.int_number = token->value.int_number;
+      break;
+    case EFloatNumber:
+      result->value.float_number = token->value.float_number;
+      break;
+    default:
+      break;
+    }
+  }
+  return result;
 }
 
 
@@ -215,4 +243,149 @@ void sexp_token_print(sexp_token* token)
   }  
 }
 
+sexp_cons* sexp_cons_alloc(sexp_item* car, sexp_cons* cdr)
+{
+  sexp_cons* result = calloc(sizeof(sexp_cons),1);
+  result->car = car;
+  result->cdr = cdr;
+  return result;
+}
+
+sexp_cons* sexp_cons_free(sexp_cons* cons)
+{
+  /*
+   * TODO: implement free procedure, maybe not recursively
+   * hint: use the iterative versions of
+   * pre-order/in-order/post-order tree traversal functions
+   * see http://en.wikipedia.org/wiki/Tree_traversal
+   */
+  switch(cons->car->type)
+  {
+  case EAtom:
+    atom_token_free(cons->car->value.atom);
+    break;
+  case ECons:
+    /* TODO: rewrite this not recursively  */
+    /* sexp_cons_free(cons->car->value.cons); */
+  break;
+  default:
+    break;
+  }
+  /* TODO: rewrite this not recursively */
+  sexp_cons_free(cons->cdr);
+  return (sexp_cons*)0;
+}
+
+
+sexp_item* sexp_item_create_atom(atom_token* original)
+{
+  sexp_item* result = calloc(sizeof(sexp_item),1);
+  result->type = EAtom;
+  result->value.atom = atom_token_clone(original);
+  return result;
+}
+
+sexp_item* sexp_item_create_cons(sexp_item* car, sexp_cons* cdr)
+{
+  sexp_item* result = calloc(sizeof(sexp_item),1);
+  result->type = ECons;
+  result->value.cons = sexp_cons_alloc(car,cdr);
+  return result;
+}
+
+sexp_item* sexp_item_create_cons_plain(sexp_cons* cons)
+{
+  sexp_item* result = 0;
+  if ( cons)
+  {
+    result = calloc(sizeof(sexp_item),1);
+    result->type = ECons;
+    result->value.cons = cons;
+  }
+  return result;
+}
+
+sexp_item* sexp_item_free(sexp_item* item)
+{
+  if (item)
+  {
+    switch(item->type)
+    {
+    case EAtom:
+      atom_token_free(item->value.atom);
+      break;
+    case ECons:
+      sexp_cons_free(item->value.cons);
+      break;
+    default:
+      break;
+    }
+    free(item);
+  }
+  return (sexp_item*)0;
+}
+
+sexp_item* sexp_item_car(sexp_item* item)
+{
+  sexp_item* result = 0;
+  if (item)
+  {
+    assert(item->type == ECons);
+    result = item->value.cons->car;
+  }
+  return result;
+}
+
+sexp_cons* sexp_item_cdr(sexp_item* item)
+{
+  sexp_cons* result = 0;
+  if ( item)
+  {
+    result = item->value.cons->cdr;
+  }
+  return result;
+}
+
+
+
+void sexp_item_print(sexp_item* item)
+{
+  sexp_item_cont_item* stack;
+  sexp_item *current, *tmp;
+  if (item)
+  {
+    /* initialize stack */
+    stack = sexp_item_cont_item_alloc(item);
+    while (stack)
+    {
+      stack = sexp_item_stack_pop(stack,&current);
+      if (!current)
+      {
+        printf(") ");
+      }
+      else
+      {
+        if ( current->type == ECons )
+        {
+          stack = sexp_item_stack_push(stack,0);
+          printf("Cons( ");
+          if (sexp_item_cdr(current))
+          {
+            tmp = sexp_item_create_cons_plain(sexp_item_cdr(current));
+            stack = sexp_item_stack_push(stack,tmp);
+          }
+
+          if ( sexp_item_car(current))
+            stack = sexp_item_stack_push(stack, sexp_item_car(current));
+        }
+        if ( current->type == EAtom)
+        {
+          atom_token_print(current->value.atom);
+          printf(" ");
+        }
+      }
+    }
+  }
+  printf("\n");
+}
 

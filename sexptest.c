@@ -8,7 +8,7 @@
 #include "sexplexer.h"
 #include "sexpcontainers.h"
 #include "sexpparser.h"
-
+#if 0
 int main ()
 {
   char* float_examples[] = {"0.0",
@@ -120,21 +120,6 @@ int main ()
   printf("\n");
   head = sexp_token_cont_list_free(head);
 
-  printf ("===============================================================\n");
-  p = s_expression_example;
-  token = read_sexp_token(&p);  
-  if (token)
-    head = sexp_token_cont_alloc(token);
-  while ( (token = read_sexp_token(&p)))
-    head = sexp_token_stack_push(head,token);
-  top = head;
-  while(top)
-  {
-    sexp_token_print(top->token);
-    top = sexp_token_stack_pop(top);
-  }
-  printf("\n");
-
   /* test parser stack */
   pstack = parser_stack_alloc();
 
@@ -164,3 +149,4 @@ int main ()
   return 0;
 }
 
+#endif
