@@ -2,7 +2,9 @@
 #ifndef _SEXPCONTAINERS_H_
 #define _SEXPCONTAINERS_H_
 
-#include "sexptokens.h"
+#include "sexptoken.h"
+#include "sexpitem.h"
+
 
 /* S-expressions containers */
 /* First container used is a list */

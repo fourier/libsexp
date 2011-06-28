@@ -2,7 +2,7 @@
 #ifndef _SEXPLEXER_H_
 #define _SEXPLEXER_H_
 
-#include "sexptokens.h"
+#include "sexptoken.h"
 
 /* Read input stream for the Sexp token */
 sexp_token* read_sexp_token(char** str);

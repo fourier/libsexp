@@ -60,6 +60,7 @@ int main(int argc, const char* argv[])
     fprintf(stderr,"Unable to parse input!\n");
   /* 3. Print output */
   sexp_item_print(sexp);
+
   /* free allocated memory */
   sexp = sexp_item_free(sexp);
   free(read_buffer);    

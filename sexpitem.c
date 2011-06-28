@@ -1,0 +1,164 @@
+/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "sexpitem.h"
+#include "sexpcontainers.h"
+
+
+sexp_item* sexp_item_create_atom(sexp_token* from)
+{
+  sexp_item* result = calloc(sizeof(sexp_item),1);
+  result->atom = from->atom;
+  from->atom = 0;
+  return result;
+}
+
+sexp_item* sexp_item_create_cons(sexp_item* car, sexp_item* cdr)
+{
+  sexp_item* result = calloc(sizeof(sexp_item),1);
+  result->car = car;
+  result->cdr = cdr;
+  return result;
+}
+
+static sexp_item* sexp_item_rotate_right(sexp_item* Q)
+{
+  /*
+   * Let P be Q's left child.
+   * Set P to be the new root.
+   * Set Q's left child to be P's right child.
+   * Set P's right child to be Q.
+   */
+  sexp_item* P = sexp_item_car(Q);
+  sexp_item* T = sexp_item_cdr(P);
+  Q->car = T;
+  P->cdr = Q;
+  return P;
+}
+
+sexp_item* sexp_item_free(sexp_item* item)
+{
+  /* iteration version othe free function */
+  sexp_item* root = item;
+  sexp_item* r;
+  if (root)
+  {
+    while(root)
+    {
+      if (root->atom)
+      {
+        atom_token_free(root->atom);
+        root->atom = 0;
+      }
+      /*
+       * if left branch exist perform right rotation 
+       * NOTE: while rotating items will contain atoms
+       * as well as CARs and CDRs
+       */
+      if (sexp_item_car(root))
+        root = sexp_item_rotate_right(root);
+      else /* otherwise delete root, root = right(root) */
+      {
+        r = root->cdr;
+        free(root);
+        root = r;
+      }
+    }
+  }
+
+  return (sexp_item*)0;
+}
+
+
+
+sexp_item* sexp_item_car(sexp_item* item)
+{
+  sexp_item* result = 0;
+  if (item)
+  {
+    /* assert(!item->atom); */
+    result = item->car;
+  }
+  return result;
+}
+
+sexp_item* sexp_item_cdr(sexp_item* item)
+{
+  sexp_item* result = 0;
+  if ( item)
+  {
+    /* assert(!item->atom); */
+    result = item->cdr;
+  }
+  return result;
+}
+
+
+
+void sexp_item_print(sexp_item* item)
+{
+  sexp_item_cont_item* stack;
+  if (item)
+  {
+    /* initialize stack */
+    stack = sexp_item_cont_item_alloc(item);
+    while (stack)
+    {
+      stack = sexp_item_stack_pop(stack,&item);
+      if ( !item->atom )
+      {
+        printf("Cons( ");
+        if (sexp_item_cdr(item))
+          stack = sexp_item_stack_push(stack,sexp_item_cdr(item));
+        if ( sexp_item_car(item))
+          stack = sexp_item_stack_push(stack, sexp_item_car(item));
+      }
+      if ( item->atom)
+      {
+        atom_token_print(item->atom);
+        printf(" ");
+      }
+    }
+    stack = sexp_item_cont_item_free(stack);
+  }
+  printf("\n");
+}
+
+int sexp_item_is_nil(sexp_item* item)
+{
+  int result = 0;
+  assert(item);
+  result = item->atom && item->atom->type == ENil;
+  return result;
+}
+
+int sexp_item_length(sexp_item* item)
+{
+  int result = -1;
+  sexp_item* next = item;
+  assert(item);
+  if ( sexp_item_is_nil(item))
+    result = 0;
+  else if (!item->atom)
+  {
+    result = 1;
+    while ( !sexp_item_is_nil(next = next->cdr))
+      result ++;
+  }
+  return result;
+}
+
+
+sexp_item* sexp_item_nth(sexp_item* item, int i)
+{
+  sexp_item* result = sexp_item_car(item);
+  assert(item);
+  assert(i >= 0);
+  for (; i > 0 && !sexp_item_is_nil(result) ; -- i)
+    result = sexp_item_car(item = item->cdr);
+  
+  return result;
+}

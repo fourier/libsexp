@@ -4,7 +4,7 @@
 #include <ctype.h>
 
 #include "sexputils.h"
-#include "sexptokens.h"
+#include "sexptoken.h"
 
 static char whitespaces[] = " \n\r\t";
  

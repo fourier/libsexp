@@ -41,14 +41,6 @@ typedef struct
   atom_token* atom;
 } sexp_token;
 
-/* struct representing SEXP item: ATOM or CONS */
-typedef struct sexp_item_tag
-{
-  atom_token* atom;             /* if not empty - ATOM */
-  /* otherwise CONS */
-  struct sexp_item_tag* car;
-  struct sexp_item_tag* cdr;
-} sexp_item;
 
 /*
  * Function declarations
@@ -92,20 +84,6 @@ void sexp_token_verbose_print(sexp_token* token);
 
 /* Print the information about Sexp token in simple format */
 void sexp_token_print(sexp_token* token);
-
-/*
- * Funcitons operating with sexp_items
- */
-
-/* create sexp_item from token, taking ownership of the atom */
-sexp_item* sexp_item_create_atom(sexp_token* from);
-sexp_item* sexp_item_create_cons(sexp_item* car, sexp_item* cdr);
-sexp_item* sexp_item_free(sexp_item* item);
-sexp_item* sexp_item_car(sexp_item* item);
-sexp_item* sexp_item_cdr(sexp_item* item);
-
-/* verbose print sexp_item as a CONS chain */
-void sexp_item_print(sexp_item* item);
 
 
 #endif /* _SEXPTOKENS_H_ */
