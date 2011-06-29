@@ -133,10 +133,6 @@ If item is a list do the same for all its elements. Returns the new list"
        (unless (< index1 (length str1))
          (return str2)))))
 
-(defun pretty-print-rule (R)
-  "Pretty-print the rule R"
-  (format t "~a" (pretty-print-rule-to-string R))
-  (format t "~%"))
 
 (defun pretty-print-rule-to-string (R)
   "Pretty print rule to the string (as a return value)"
@@ -154,7 +150,13 @@ If item is a list do the same for all its elements. Returns the new list"
             (if (eq X +dot+)
                 (format str ".")
                 (format str "~a " X))))
-    str)))
+      str)))
+
+
+(defun pretty-print-rule (R)
+  "Pretty-print the rule R"
+  (format t "~a" (pretty-print-rule-to-string R))
+  (format t "~%"))
 
 (defun print-grammar (grammar)
   (let ((rules (grammar-rules grammar)))
@@ -168,12 +170,6 @@ If item is a list do the same for all its elements. Returns the new list"
     (dolist (X (nth i items-list))
       (pretty-print-rule X))))
 
-
-(defun nonterminal-from-rule-for-closure (grammar rule)
-  "Determine the rule to holding +dot+ followed by nonterminal
-Returns nonterminal if (+dot+,nonterminal) pair found or nil otherwise"
-  (nonterminal-for-closure grammar (second rule)))
-
 (defun nonterminal-for-closure (grammar production)
   "Helper function for rule-for-closure;
 do the actual work for right-side of the rule"
@@ -184,6 +180,13 @@ do the actual work for right-side of the rule"
       (or (and (eq fst +dot+)
                (find snd (grammar-nonterminals grammar) :test #'equal))
           (nonterminal-for-closure grammar (rest production))))))
+
+
+(defun nonterminal-from-rule-for-closure (grammar rule)
+  "Determine the rule to holding +dot+ followed by nonterminal
+Returns nonterminal if (+dot+,nonterminal) pair found or nil otherwise"
+  (nonterminal-for-closure grammar (second rule)))
+
 
 
 (defun find-all-productions (grammar nonterminal)
@@ -326,98 +329,6 @@ from book \"Compilers: Principles, Techniques, and Tools\" by  Aho, Sethi, Ullma
                  (setf updated t))))))
     items))
 
-(defun slr-table (grammar)
-  "Create the SLR parse table for the given grammar"
-  (let* ((table (make-parse-table))     ; resulting table
-         (items (grammar-ll0-items grammar)) ; items (LL0)
-         (follow (create-follow-table grammar))) ; follow table
-    (flet ((index-in (items item)
-             (let ((r -1))
-               (dotimes (i (length items))
-                 (when (equal item (nth i items))
-                   (setf r i)))
-           r))
-           (remove-dot (R)
-             (let ((prod (remove +dot+ (second R))))
-               (cons (first R)
-                     (if (= (length prod) 1)
-                         prod
-                         (list prod)))))
-           (string-for-value (value new-value)
-             (if (or (not value)
-                     (string= value new-value))
-                 new-value
-                 (format nil "~a/~a" value new-value))))
-      ;; 1. initialize results with vectors of hashes
-      (setf (parse-table-action-table table)         
-            (make-array (length items) :initial-element nil)
-            (parse-table-goto-table table)
-            (make-array (length items) :initial-element nil))
-      (dotimes (i (length items))
-        (setf (aref (parse-table-goto-table table) i)
-              (make-hash-table)
-              (aref (parse-table-action-table table) i)
-              (make-hash-table)))
-      ;; 2. create goto-table
-      (dotimes (i (length items))
-        (dolist (X (grammar-nonterminals grammar))
-          (let* ((goto-items (goto grammar (nth i items) X))
-                 (index (index-in items goto-items)))
-            (when (not (eq index -1 ))
-              (setf (gethash X
-                             (aref (parse-table-goto-table table) i))
-                    index)))))
-      ;; 3. create action-table
-      (let ((terminals (append (grammar-terminals grammar) (list +end+))))
-        (dotimes (i (length items))
-          (let ((item (nth i items)))
-            (dolist (R item)
-              (let ((after-dot (member +dot+ (second R))))
-                (cond
-                  ;; 3.1 if S' -> S. in I_i
-                  ((eq (first R) (grammar-start-symbol grammar))
-                   (when (eq (car (last (second R))) +dot+)
-                     ;; value and new-value are just
-                     ;; preparations for conflicts
-                     (let ((value
-                            (gethash +end+
-                                     (aref
-                                      (parse-table-action-table table) i))))
-                       (setf (gethash +end+
-                                      (aref (parse-table-action-table table) i))
-                             (string-for-value value "acc")
-                             ))))
-                  ;; 3.2 A -> w. in I_i
-                  ((and (> (length after-dot) 1)
-                        (member (second after-dot) terminals))
-                   ;; terminal
-                   (let* ((term (second after-dot))
-                          (Ij (goto grammar (nth i items) term))
-                          (j (index-in items Ij)))
-                     (when (and Ij
-                                (/= j -1 ))
-                       (let ((value (gethash term
-                                      (aref (parse-table-action-table table) i)))
-                             (new-value (format nil "s~d" j)))
-                         (setf (gethash term
-                                        (aref (parse-table-action-table table) i))
-                               (string-for-value value new-value))))))
-                   ;; 3.3 A -> w.av in I_i, a - terminal
-                  ((and (eq (car (last (second R))) +dot+)
-                        (not (eq (first R) (grammar-start-symbol grammar))))
-                   (let* ((follow-A (gethash (first R) follow))
-                          (rule (remove-dot R))
-                          (index (index-in (grammar-rules grammar) rule)))
-                     (when (= index -1) (print rule))
-                     (dolist (term follow-A)
-                       (let ((value (gethash term
-                                      (aref (parse-table-action-table table) i)))
-                             (new-value (format nil "r~d" index)))
-                         (setf (gethash
-                                term
-                                (aref (parse-table-action-table table) i))
-                               (string-for-value value new-value))))))))))))
-      table)))
     
 
 
@@ -518,7 +429,6 @@ with conjunction with first-function"
                                  (add-to-results X (gethash Y first-table)))))))))))))
     first-table))
 
-
 (defun create-follow-table (grammar)
   (let ((follow-table (make-hash-table)) ; define result as a hash table
         (first-table (create-first-table grammar))
@@ -567,6 +477,7 @@ with conjunction with first-function"
     follow-table))
 
 
+
 (defun create-ll0-table (grammar)
   (let ((first-table (create-first-table grammar))
         (follow-table (create-follow-table grammar))
@@ -599,92 +510,100 @@ with conjunction with first-function"
     ll0-table))
 
 
+(defun slr-table (grammar)
+  "Create the SLR parse table for the given grammar"
+  (let* ((table (make-parse-table))     ; resulting table
+         (items (grammar-ll0-items grammar)) ; items (LL0)
+         (follow (create-follow-table grammar))) ; follow table
+    (flet ((index-in (items item)
+             (let ((r -1))
+               (dotimes (i (length items))
+                 (when (equal item (nth i items))
+                   (setf r i)))
+           r))
+           (remove-dot (R)
+             (let ((prod (remove +dot+ (second R))))
+               (cons (first R)
+                     (if (= (length prod) 1)
+                         prod
+                         (list prod)))))
+           (string-for-value (value new-value)
+             (if (or (not value)
+                     (string= value new-value))
+                 new-value
+                 (format nil "~a/~a" value new-value))))
+      ;; 1. initialize results with vectors of hashes
+      (setf (parse-table-action-table table)         
+            (make-array (length items) :initial-element nil)
+            (parse-table-goto-table table)
+            (make-array (length items) :initial-element nil))
+      (dotimes (i (length items))
+        (setf (aref (parse-table-goto-table table) i)
+              (make-hash-table)
+              (aref (parse-table-action-table table) i)
+              (make-hash-table)))
+      ;; 2. create goto-table
+      (dotimes (i (length items))
+        (dolist (X (grammar-nonterminals grammar))
+          (let* ((goto-items (goto grammar (nth i items) X))
+                 (index (index-in items goto-items)))
+            (when (not (eq index -1 ))
+              (setf (gethash X
+                             (aref (parse-table-goto-table table) i))
+                    index)))))
+      ;; 3. create action-table
+      (let ((terminals (append (grammar-terminals grammar) (list +end+))))
+        (dotimes (i (length items))
+          (let ((item (nth i items)))
+            (dolist (R item)
+              (let ((after-dot (member +dot+ (second R))))
+                (cond
+                  ;; 3.1 if S' -> S. in I_i
+                  ((eq (first R) (grammar-start-symbol grammar))
+                   (when (eq (car (last (second R))) +dot+)
+                     ;; value and new-value are just
+                     ;; preparations for conflicts
+                     (let ((value
+                            (gethash +end+
+                                     (aref
+                                      (parse-table-action-table table) i))))
+                       (setf (gethash +end+
+                                      (aref (parse-table-action-table table) i))
+                             (string-for-value value "acc")
+                             ))))
+                  ;; 3.2 A -> w. in I_i
+                  ((and (> (length after-dot) 1)
+                        (member (second after-dot) terminals))
+                   ;; terminal
+                   (let* ((term (second after-dot))
+                          (Ij (goto grammar (nth i items) term))
+                          (j (index-in items Ij)))
+                     (when (and Ij
+                                (/= j -1 ))
+                       (let ((value (gethash term
+                                      (aref (parse-table-action-table table) i)))
+                             (new-value (format nil "s~d" j)))
+                         (setf (gethash term
+                                        (aref (parse-table-action-table table) i))
+                               (string-for-value value new-value))))))
+                   ;; 3.3 A -> w.av in I_i, a - terminal
+                  ((and (eq (car (last (second R))) +dot+)
+                        (not (eq (first R) (grammar-start-symbol grammar))))
+                   (let* ((follow-A (gethash (first R) follow))
+                          (rule (remove-dot R))
+                          (index (index-in (grammar-rules grammar) rule)))
+                     (when (= index -1) (print rule))
+                     (dolist (term follow-A)
+                       (let ((value (gethash term
+                                      (aref (parse-table-action-table table) i)))
+                             (new-value (format nil "r~d" index)))
+                         (setf (gethash
+                                term
+                                (aref (parse-table-action-table table) i))
+                               (string-for-value value new-value))))))))))))
+      table)))
 
-;;
-;; Tests
-;;
 
-(defun test-create-first-table0()
-  (let ((first-table (create-first-table *grammar-0*)))
-    (dolist (X (grammar-nonterminals *grammar-0*))
-      (format t "term = ~a: " X)
-      (print
-       (first-function X first-table))
-      (format t "~%"))))
-
-
-(defun test-create-first-table1()
-  (let ((first-table (create-first-table *grammar-1*)))
-    (dolist (X (grammar-nonterminals *grammar-1*))
-      (format t "term = ~a: " X)
-      (print
-       (first-function X first-table))
-      (format t "~%"))))
-
-(defun test-create-first-table2()
-  (let ((first-table (create-first-table *grammar-2*)))
-    (dolist (X
-              (append (grammar-nonterminals *grammar-2*)
-                      (list 
-                       (list 'S 'E) ;;FIRST(SE)  = {a,b}
-                       (list 'b 'E 'c);;  FIRST(bEc) = {b}
-                       (list 'b 'c))));;  FIRST(bc)  = {b}
-      (format t "term = ~a: " X)
-      (print
-       (first-function X first-table))
-      (format t "~%"))))
-
-
-(defun test-ll0-table-grammar0()
-  (let ((ll-table (create-ll0-table *grammar-0*))
-        (terminals+end (append (grammar-terminals *grammar-0*) (list +end+)))
-        (nonterminals (grammar-nonterminals *grammar-0*)))
-    (dolist (X nonterminals)
-      (dolist (Y terminals+end)
-        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
-      (format t "~%"))))
-
-(defun test-ll0-table-grammar1()
-  (let ((ll-table (create-ll0-table *grammar-1*))
-        (terminals+end (append (grammar-terminals *grammar-1*) (list +end+)))
-        (nonterminals (grammar-nonterminals *grammar-1*)))
-    (dolist (X nonterminals)
-      (dolist (Y terminals+end)
-        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
-      (format t "~%"))))
-
-(defun test-ll0-table-grammar2()
-  (let ((ll-table (create-ll0-table *grammar-2*))
-        (terminals+end (append (grammar-terminals *grammar-2*) (list +end+)))
-        (nonterminals (grammar-nonterminals *grammar-2*)))
-    (dolist (X nonterminals)
-      (dolist (Y terminals+end)
-        (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
-      (format t "~%"))))
-
-(defun print-action-goto-table (grammar table)
-  (let ((len (length (parse-table-goto-table table)))
-        (nonterminals (remove (grammar-start-symbol grammar)
-                (grammar-nonterminals grammar)))
-        (terminals (append (grammar-terminals grammar) (list +end+))))
-    (format t "GOTO:~%")
-    (dolist (X nonterminals)
-      (format t "  ~a" X))
-    (format t "~%")
-    (dotimes (i len)
-      (format t "~d " i)
-      (dolist (X nonterminals)
-        (format t "~a " (gethash X (aref (parse-table-goto-table table) i))))
-      (format t "~%"))
-    (format t "ACTION:~%")
-    (dolist (X terminals)
-      (format t " ~a" X))
-    (format t "~%")
-    (dotimes (i len)
-      (format t "~d " i)
-      (dolist (X terminals)
-        (format t "~a " (gethash X (aref (parse-table-action-table table) i))))
-      (format t "~%"))))
     
 (defun print-slr-table-and-grammar-to-file (grammar table filename)
   (labels ((enum-formatting-function (x)
@@ -854,6 +773,94 @@ with conjunction with first-function"
           (format source "~{  ~a~^,~%~}" (reverse goto-rows))
           (format source "~%};~%~%"))))))
 
+(when (> (length *posix-argv*) 0)
+  (print-slr-table-and-grammar-to-file *grammar-2*
+                                       (slr-table *grammar-2*)
+                                       (second *posix-argv*)))
+(quit)
+    
+;; ;;
+;; ;; Tests
+;; ;;
 
-    
-    
+;; (defun test-create-first-table0()
+;;   (let ((first-table (create-first-table *grammar-0*)))
+;;     (dolist (X (grammar-nonterminals *grammar-0*))
+;;       (format t "term = ~a: " X)
+;;       (print
+;;        (first-function X first-table))
+;;       (format t "~%"))))
+
+
+;; (defun test-create-first-table1()
+;;   (let ((first-table (create-first-table *grammar-1*)))
+;;     (dolist (X (grammar-nonterminals *grammar-1*))
+;;       (format t "term = ~a: " X)
+;;       (print
+;;        (first-function X first-table))
+;;       (format t "~%"))))
+
+;; (defun test-create-first-table2()
+;;   (let ((first-table (create-first-table *grammar-2*)))
+;;     (dolist (X
+;;               (append (grammar-nonterminals *grammar-2*)
+;;                       (list 
+;;                        (list 'S 'E) ;;FIRST(SE)  = {a,b}
+;;                        (list 'b 'E 'c);;  FIRST(bEc) = {b}
+;;                        (list 'b 'c))));;  FIRST(bc)  = {b}
+;;       (format t "term = ~a: " X)
+;;       (print
+;;        (first-function X first-table))
+;;       (format t "~%"))))
+
+
+;; (defun test-ll0-table-grammar0()
+;;   (let ((ll-table (create-ll0-table *grammar-0*))
+;;         (terminals+end (append (grammar-terminals *grammar-0*) (list +end+)))
+;;         (nonterminals (grammar-nonterminals *grammar-0*)))
+;;     (dolist (X nonterminals)
+;;       (dolist (Y terminals+end)
+;;         (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+;;       (format t "~%"))))
+
+;; (defun test-ll0-table-grammar1()
+;;   (let ((ll-table (create-ll0-table *grammar-1*))
+;;         (terminals+end (append (grammar-terminals *grammar-1*) (list +end+)))
+;;         (nonterminals (grammar-nonterminals *grammar-1*)))
+;;     (dolist (X nonterminals)
+;;       (dolist (Y terminals+end)
+;;         (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+;;       (format t "~%"))))
+
+;; (defun test-ll0-table-grammar2()
+;;   (let ((ll-table (create-ll0-table *grammar-2*))
+;;         (terminals+end (append (grammar-terminals *grammar-2*) (list +end+)))
+;;         (nonterminals (grammar-nonterminals *grammar-2*)))
+;;     (dolist (X nonterminals)
+;;       (dolist (Y terminals+end)
+;;         (format t "M[~a,~a] = ~a~%" X Y (gethash Y (gethash X ll-table))))
+;;       (format t "~%"))))
+
+;; (defun print-action-goto-table (grammar table)
+;;   (let ((len (length (parse-table-goto-table table)))
+;;         (nonterminals (remove (grammar-start-symbol grammar)
+;;                               (grammar-nonterminals grammar)))
+;;         (terminals (append (grammar-terminals grammar) (list +end+))))
+;;     (format t "GOTO:~%")
+;;     (dolist (X nonterminals)
+;;       (format t "  ~a" X))
+;;     (format t "~%")
+;;     (dotimes (i len)
+;;       (format t "~d " i)
+;;       (dolist (X nonterminals)
+;;         (format t "~a " (gethash X (aref (parse-table-goto-table table) i))))
+;;       (format t "~%"))
+;;     (format t "ACTION:~%")
+;;     (dolist (X terminals)
+;;       (format t " ~a" X))
+;;     (format t "~%")
+;;     (dotimes (i len)
+;;       (format t "~d " i)
+;;       (dolist (X terminals)
+;;         (format t "~a " (gethash X (aref (parse-table-action-table table) i))))
+;;       (format t "~%"))))

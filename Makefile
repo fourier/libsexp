@@ -1,6 +1,8 @@
 # -*- Mode: makefile; -*-
 # Makefile for the SexpLib project
 
+# to create sexpgrammar.[ch] use the following command:
+# sbcl --load sexpgrammar.lisp sexpgrammar
 CC = gcc
 
 CFLAGS = -ggdb -pg -ansi -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
