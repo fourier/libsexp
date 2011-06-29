@@ -11,6 +11,7 @@ sexp_token* read_sexp_token(char** str)
   if (ptr)
   {
     ptr = skip_whitespaces(ptr);
+    ptr = skip_comment(ptr);
     switch (*ptr)
     {
     case '(':

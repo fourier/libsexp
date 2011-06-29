@@ -8,6 +8,10 @@
 char* skip_whitespaces(char* str);
 
 /*
+ * skips one-line comments starting with ';' up to the end of the string */
+char* skip_comment(char* str);
+
+/*
  * returns pointer to the next-to-the-last character
  * if str is a floating point number
  *

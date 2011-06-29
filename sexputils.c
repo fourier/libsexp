@@ -94,6 +94,14 @@ char* skip_whitespaces(char* str)
   }
   return str;
 }
+
+char* skip_comment(char* str)
+{
+  if (*str == ';')
+    while ( str && *str != '\n')
+      str++;
+  return str;
+}
                       
 
 char* find_end_of_floating_point_number(char* str)
