@@ -8,6 +8,7 @@
 
 const int block_size = 255;
 
+
 int main(int argc, const char* argv[])
 {
   /* input file */

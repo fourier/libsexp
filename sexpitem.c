@@ -96,9 +96,7 @@ sexp_item* sexp_item_cdr(sexp_item* item)
   return result;
 }
 
-
-
-void sexp_item_print(sexp_item* item)
+void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data)
 {
   sexp_item_cont_item* stack;
   if (item)
@@ -110,21 +108,33 @@ void sexp_item_print(sexp_item* item)
       stack = sexp_item_stack_pop(stack,&item);
       if ( !item->atom )
       {
-        printf("Cons( ");
         if (sexp_item_cdr(item))
           stack = sexp_item_stack_push(stack,sexp_item_cdr(item));
         if ( sexp_item_car(item))
           stack = sexp_item_stack_push(stack, sexp_item_car(item));
       }
-      if ( item->atom)
-      {
-        atom_token_print(item->atom);
-        printf(" ");
-      }
+      function(item,data);
     }
     stack = sexp_item_cont_item_free(stack);
   }
-  printf("\n");
+}
+
+static void item_print(sexp_item* item, void* data)
+{
+  data = 0;                     /* to reduce compiler warnings */
+  if (item->atom)
+  {
+    atom_token_print(item->atom);
+    printf(" ");
+  }
+  else
+    printf("Cons( ");
+}
+
+
+void sexp_item_print(sexp_item* item)
+{
+  sexp_item_traverse(item,item_print,(void*)0);
 }
 
 int sexp_item_is_nil(sexp_item* item)

@@ -13,6 +13,7 @@ typedef struct sexp_item_tag
   struct sexp_item_tag* cdr;
 } sexp_item;
 
+typedef void (*appy_to_item_t) (sexp_item* item, void* data);
 
 /*
  * Funcitons operating with sexp_items
@@ -30,6 +31,9 @@ int sexp_item_is_nil(sexp_item* item);
 int sexp_item_length(sexp_item* item);
 /* return i-th element of the list item, 0 if not found */
 sexp_item* sexp_item_nth(sexp_item* item, int i);
+
+/* sexp item tree traversal */
+void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
 
 /* verbose print sexp_item as a CONS chain */
 void sexp_item_print(sexp_item* item);
