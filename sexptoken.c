@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "sexptoken.h"
 #include "sexpcontainers.h"
@@ -120,9 +121,12 @@ atom_token* atom_token_string_alloc(const char* begin, const char* end)
 atom_token* atom_token_symbol_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(ESymbol);
+  char* ptr;
   int size = end - begin + 1;
   token->value.string = calloc(size, 1);
-  memcpy(token->value.symbol,begin,size - 1);
+  ptr = token->value.string;
+  while(begin != end)
+    *ptr++ = toupper(*begin++);
   return token;
 }
 
