@@ -7,7 +7,6 @@
 #include "sexptoken.h"
 #include "sexpcontainers.h"
 
-
 atom_token* atom_token_alloc(AtomTokenType type)
 {
   atom_token* token = calloc(1, sizeof(atom_token));
@@ -39,7 +38,7 @@ atom_token* atom_token_free(atom_token* token)
   return (atom_token*)0;
 }
 
-atom_token* atom_token_integer_alloc(char* begin, char* end)
+atom_token* atom_token_integer_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(EIntegerNumber);
   if ( begin != end)
@@ -49,24 +48,28 @@ atom_token* atom_token_integer_alloc(char* begin, char* end)
   return token;
 }
 
-atom_token* atom_token_float_alloc(char* begin, char* end)
+atom_token* atom_token_float_alloc(const char* begin, const char* end)
 {
+  /*
+   * TODO: fix possible underflow, etc
+   */
   atom_token* token = atom_token_alloc(EFloatNumber);
-  char* parsed_end = end;
-  char* buf = (char*)0;
   int size = end - begin + 1;
-  token->value.float_number = strtod(begin,&parsed_end);
-  if ( parsed_end != end)
+  char* buf = (char*)0;
+  const char** parsed_end = &end;
+  token->value.float_number = strtod(begin,(char**)parsed_end);
+  if ( *parsed_end == begin)
   {
     buf = calloc(size,1);
     memcpy(buf,begin,size - 1);
     fprintf(stderr,"number: '%s' incorrectly parsed",buf);
     free(buf);
+    atom_token_free(token);
   }
   return token;
 }
 
-atom_token* atom_token_string_alloc(char* begin, char* end)
+atom_token* atom_token_string_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(EString);
   int size = end - begin + 1;
@@ -75,7 +78,7 @@ atom_token* atom_token_string_alloc(char* begin, char* end)
   return token;
 }
 
-atom_token* atom_token_symbol_alloc(char* begin, char* end)
+atom_token* atom_token_symbol_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(ESymbol);
   int size = end - begin + 1;
@@ -89,65 +92,6 @@ atom_token* atom_token_nil_alloc()
   atom_token* token = atom_token_alloc(ENil);
   return token;
 }
-
-void atom_token_verbose_print(atom_token* token)
-{
-  if (token)
-  {
-    switch (token->type)
-    {
-    case EIntegerNumber:
-      printf("type: Integer\n");
-      printf("value: %d\n",token->value.int_number);
-      break;
-    case EFloatNumber:
-      printf("type: Float\n");
-      printf("value: %f\n",token->value.float_number);
-      break;
-    case EString:
-      printf("type: String\n");
-      printf("value: %s\n",token->value.string);
-      break;
-    case ESymbol:
-      printf("type: Symbol\n");
-      printf("value: %s\n",token->value.symbol);
-      break;
-    case ENil:
-      printf("type: Nil\n");
-      printf("value: NIL\n");
-      break;
-    default:
-      break;
-    }
-  }
-}
-
-void atom_token_print(atom_token* token)
-{
-  if (token)
-  {
-    switch (token->type)
-    {
-    case EIntegerNumber:
-      printf("%d",token->value.int_number);
-      break;
-    case EFloatNumber:
-      printf("%f",token->value.float_number);
-      break;
-    case EString:
-      printf("%s",token->value.string);
-      break;
-    case ESymbol:
-      printf("%s",token->value.symbol);
-      break;
-    case ENil:
-      printf("NIL");
-    default:
-      break;
-    }
-  }
-}
-
 
 
 sexp_token* sexp_token_alloc(TerminalType type, atom_token* atom)
@@ -178,53 +122,3 @@ sexp_token* sexp_token_free(sexp_token* token)
   }
   return (sexp_token*)0;
 }
-
-
-void sexp_token_verbose_print(sexp_token* token)
-{
-  if (token)
-  {
-    switch ( token->type)
-    {
-    case EOPENPAREN:
-      printf("type: OpenParen\n");
-      printf("value: '('\n");
-      break;
-    case ECLOSEPAREN:
-      printf("type: CloseParen\n");
-      printf("value: ')'\n");
-      break;
-    case EATOM:
-      atom_token_verbose_print(token->atom);
-      break;
-    case EEND:
-    default:
-      break;
-    }
-  }
-}
-
-void sexp_token_print(sexp_token* token)
-{
-  if (token)
-  {
-    switch ( token->type)
-    {
-    case EOPENPAREN:
-      printf("( ");
-      break;
-    case ECLOSEPAREN:
-      printf(") ");
-      break;
-    case EATOM:
-      atom_token_print(token->atom);
-      printf(" ");
-      break;
-    case EEND:
-      printf("$");
-    default:
-      break;
-    }
-  }  
-}
-

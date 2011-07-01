@@ -6,6 +6,8 @@
 
 #include <assert.h>
 
+#include "sexplexer.h"
+
 #include "sexpparser.h"
 
 
@@ -107,7 +109,7 @@ static parser_stack_item* parser_stack_peek_state(parser_stack* stack)
 static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
 {
   sexp_item* result = 0;
-  sexp_token* nil_token = sexp_token_alloc(EATOM,atom_token_alloc(ENil));
+  sexp_token* nil_token = sexp_token_alloc(EATOM,atom_token_nil_alloc());
   sexp_item* nil = sexp_item_create_atom(nil_token);
   sexp_token_free(nil_token);
   /*
@@ -157,7 +159,7 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
   return result;
 }
 
-sexp_item* sexp_parse(sexp_token_cont_item* head, int do_print)
+sexp_item* parse_sexp_token_list(sexp_token_cont_item* head, int do_print)
 {
   sexp_item *result = 0;
   parser_stack* stack = parser_stack_alloc();
@@ -255,3 +257,29 @@ sexp_item* sexp_parse(sexp_token_cont_item* head, int do_print)
 }
 
 
+sexp_item* sexp_parse(const char* text)
+{
+  const char* p = text;
+
+  /* list of tokens */
+  sexp_token_cont_item *head = 0;
+  sexp_token* token = 0;
+
+  /* parser result */
+  sexp_item* sexp;
+
+  /* 1. Lexer */
+  token = read_sexp_token(&p);  
+  if (token)
+    head = sexp_token_cont_item_alloc(token);
+  while ( (token = read_sexp_token(&p)))
+    sexp_token_list_add(head,token);
+
+  /* 2. Parser */
+  sexp = parse_sexp_token_list(head,1);
+  if (!sexp)
+    fprintf(stderr,"Unable to parse input!\n");
+  /* 3. Free the allocated memory  */
+  head = sexp_token_cont_list_free(head);
+  return sexp;
+}

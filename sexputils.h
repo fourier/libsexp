@@ -5,11 +5,11 @@
 /*
  * skips whitespaces from the input stream
  */
-char* skip_whitespaces(char* str);
+const char* skip_whitespaces(const char* str);
 
 /*
  * skips one-line comments starting with ';' up to the end of the string */
-char* skip_comment(char* str);
+const char* skip_comment(const char* str);
 
 /*
  * returns pointer to the next-to-the-last character
@@ -24,7 +24,7 @@ char* skip_comment(char* str);
  * exponent ::= exponent-marker [sign] {digit}+
  * exponent-marker ::= "e" | "E"
  */
-char* find_end_of_floating_point_number(char* str);
+const char* find_end_of_floating_point_number(const char* str);
 
 
 /*
@@ -36,7 +36,7 @@ char* find_end_of_floating_point_number(char* str);
  * sign ::= "+" | "-"
  * digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
  */
-char* find_end_of_integer_number(char* str);
+const char* find_end_of_integer_number(const char* str);
 
 /*
  * returns pointer to the next-to-the-last character
@@ -55,7 +55,7 @@ char* find_end_of_integer_number(char* str);
  * printable ::= digit | punct | alpha
  * string ::= double-quote {printable|space|escaped-double-quote}* double-quote
  */
-char* find_end_of_quoted_string(char* str);
+const char* find_end_of_quoted_string(const char* str);
 
 /*
  * returns pointer to the next-to-the-last character
@@ -70,7 +70,7 @@ char* find_end_of_quoted_string(char* str);
  * symbol-constituent :== symbol-initial | digit | "+" | "-" | "." | "@"
  * peculiar-symbol ::= "+" | "-"
  */
-char* find_end_of_symbol(char* str);
+const char* find_end_of_symbol(const char* str);
 
 
 

@@ -119,24 +119,6 @@ void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data)
   }
 }
 
-static void item_print(sexp_item* item, void* data)
-{
-  data = 0;                     /* to reduce compiler warnings */
-  if (item->atom)
-  {
-    atom_token_print(item->atom);
-    printf(" ");
-  }
-  else
-    printf("Cons( ");
-}
-
-
-void sexp_item_print(sexp_item* item)
-{
-  sexp_item_traverse(item,item_print,(void*)0);
-}
-
 int sexp_item_is_nil(sexp_item* item)
 {
   int result = 0;
@@ -172,3 +154,4 @@ sexp_item* sexp_item_nth(sexp_item* item, int i)
   
   return result;
 }
+

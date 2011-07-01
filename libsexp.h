@@ -1,0 +1,71 @@
+#ifndef _LIBSEXP_H_
+#define _LIBSEXP_H_
+
+/*
+ * Type declarations
+ */
+
+/*
+ * Enum specifying atom-level token types as
+ * integer, float, string, symbol
+ */
+typedef enum
+{
+  EIntegerNumber,
+  EFloatNumber,
+  EString,
+  ESymbol,
+  ENil
+} AtomTokenType;
+
+/* Structure holding atoms */
+typedef struct
+{
+  AtomTokenType type;
+  union Value
+  {
+    int int_number;
+    double float_number;
+    char* string;
+    char* symbol;
+  } value;
+} atom_token;
+
+/* struct representing SEXP item: ATOM or CONS */
+typedef struct sexp_item_tag
+{
+  atom_token* atom;             /* if not empty - ATOM */
+  /* otherwise CONS */
+  struct sexp_item_tag* car;
+  struct sexp_item_tag* cdr;
+} sexp_item;
+
+typedef void (*appy_to_item_t) (sexp_item* item, void* data);
+
+/*
+ * Functions operating with sexp_items
+ * Implemented in sexpitem.c
+ */
+
+sexp_item* sexp_item_free(sexp_item* item);
+sexp_item* sexp_item_car(sexp_item* item);
+sexp_item* sexp_item_cdr(sexp_item* item);
+/* return non-zero if item is atom of type nil */
+int sexp_item_is_nil(sexp_item* item);
+/* calculates the length of the list item. -1 if item is not of type list */
+int sexp_item_length(sexp_item* item);
+/* return i-th element of the list item, 0 if not found */
+sexp_item* sexp_item_nth(sexp_item* item, int i);
+
+/* sexp item tree traversal */
+void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
+
+/*
+ * Parse function. Returns the parsed root item when parsing is complete
+ * Implemented in sexpparse.c
+ * 
+ */
+sexp_item* sexp_parse(const char* text);
+
+
+#endif /* _LIBSEXP_H_ */

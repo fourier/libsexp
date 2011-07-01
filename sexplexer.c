@@ -3,15 +3,21 @@
 #include "sexputils.h"
 
 
-sexp_token* read_sexp_token(char** str)
+sexp_token* read_sexp_token(const char** str)
 {
   sexp_token* token = (sexp_token*)0;
   atom_token* atom  = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
+  const char* p = ptr;
   if (ptr)
   {
-    ptr = skip_whitespaces(ptr);
-    ptr = skip_comment(ptr);
+    do
+    {
+      ptr = p;
+      p = skip_whitespaces(p);
+      p = skip_comment(p);
+    } while(ptr != p);
+    
     switch (*ptr)
     {
     case '(':
@@ -33,10 +39,10 @@ sexp_token* read_sexp_token(char** str)
   return token;
 }
 
-static atom_token* read_atom_token_integer(char** str)
+static atom_token* read_atom_token_integer(const char** str)
 {
   atom_token* token = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
   if (ptr)
   {
     ptr = find_end_of_integer_number(ptr);
@@ -47,10 +53,10 @@ static atom_token* read_atom_token_integer(char** str)
   return token;
 }
 
-static atom_token* read_atom_token_float(char** str)
+static atom_token* read_atom_token_float(const char** str)
 {
   atom_token* token = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
   if (ptr)
   {
     ptr = find_end_of_floating_point_number(ptr);
@@ -61,10 +67,10 @@ static atom_token* read_atom_token_float(char** str)
   return token;
 }
 
-static atom_token* read_atom_token_string(char** str)
+static atom_token* read_atom_token_string(const char** str)
 {
   atom_token* token = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
   if (ptr)
   {
     ptr = find_end_of_quoted_string(ptr);
@@ -76,7 +82,7 @@ static atom_token* read_atom_token_string(char** str)
 }
 
 /* return nonzero if string is NIL */
-static int check_if_nil(char* begin, char* end)
+static int check_if_nil(const char* begin, const char* end)
 {
   int result = 0;
   if ( end - begin == 3)
@@ -86,10 +92,10 @@ static int check_if_nil(char* begin, char* end)
   return result;
 }
 
-static atom_token* read_atom_token_symbol(char** str)
+static atom_token* read_atom_token_symbol(const char** str)
 {
   atom_token* token = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
   if (ptr)
   {
     ptr = find_end_of_symbol(ptr);
@@ -102,10 +108,10 @@ static atom_token* read_atom_token_symbol(char** str)
 }
 
 
-atom_token* read_atom_token(char** str)
+atom_token* read_atom_token(const char** str)
 {
   atom_token* token = (atom_token*)0;
-  char* ptr = *str;
+  const char* ptr = *str;
   if (ptr)
   {
      /* determine atom type, if possible */

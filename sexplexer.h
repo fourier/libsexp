@@ -5,10 +5,10 @@
 #include "sexptoken.h"
 
 /* Read input stream for the Sexp token */
-sexp_token* read_sexp_token(char** str);
+sexp_token* read_sexp_token(const char** str);
 
 /* Read input stream for the Atom token */
-atom_token* read_atom_token(char** str);
+atom_token* read_atom_token(const char** str);
 
 
 #endif /* _SEXPLEXER_H_ */

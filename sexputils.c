@@ -6,14 +6,14 @@
 #include "sexputils.h"
 #include "sexptoken.h"
 
-static char whitespaces[] = " \n\r\t";
+static const char whitespaces[] = " \n\r\t";
  
 
 /*
  * Auxulary functions used only in this source file
  */
 
-static int is_from(char c, char* from)
+static int is_from(const char c, const char* from)
 {
   if (from && c)
   {
@@ -28,9 +28,9 @@ static int is_from(char c, char* from)
 }
 
 
-static char* skip_sign(char* str)
+static const char* skip_sign(const char* str)
 {
-  static char signs[] = "+-";
+  static const char signs[] = "+-";
   if (str)
   {
     if (is_from(*str,signs))
@@ -39,7 +39,7 @@ static char* skip_sign(char* str)
   return str;
 }
 
-static char* skip_decimal(char* str)
+static const char* skip_decimal(const char* str)
 {
   if (str)
   {
@@ -49,7 +49,7 @@ static char* skip_decimal(char* str)
   return str;
 }
 
-static char* skip_digits(char* str)
+static const char* skip_digits(const char* str)
 {
   if (str)
   {
@@ -59,10 +59,10 @@ static char* skip_digits(char* str)
   return str;
 }
 
-static char* skip_exponent(char* str)
+static const char* skip_exponent(const char* str)
 {
-  static char exponent_marker[] = "eE";
-  char* begin = str;
+  static const char exponent_marker[] = "eE";
+  const char* begin = str;
   int counter = 0;
   if (str)
   {
@@ -72,7 +72,7 @@ static char* skip_exponent(char* str)
       str = skip_sign(str);
       counter = str - begin - 1;      /* 0 if no sign, 1 otherwise */
       str = skip_digits(str);
-      /* at least 2 chars: 'e' and digint */
+      /* at least 2 const chars: 'e' and digint */
       if (str - begin - counter  < 2) 
         str = begin;              
     }
@@ -85,7 +85,7 @@ static char* skip_exponent(char* str)
  * Actual implementation of declared functions
  */
 
-char* skip_whitespaces(char* str)
+const char* skip_whitespaces(const char* str)
 {
   if (str)
   {
@@ -95,7 +95,7 @@ char* skip_whitespaces(char* str)
   return str;
 }
 
-char* skip_comment(char* str)
+const char* skip_comment(const char* str)
 {
   if (*str == ';')
     while ( str && *str != '\n')
@@ -104,11 +104,11 @@ char* skip_comment(char* str)
 }
                       
 
-char* find_end_of_floating_point_number(char* str)
+const char* find_end_of_floating_point_number(const char* str)
 {
   /* variables used */
-  char* begin = str;
-  char* ptr;
+  const char* begin = str;
+  const char* ptr;
   int digits_skipped = 0;
   int decimal_skipped = 0;
   /* 1) - test for sign */
@@ -141,9 +141,9 @@ char* find_end_of_floating_point_number(char* str)
 }
 
 
-char* find_end_of_integer_number(char* str)
+const char* find_end_of_integer_number(const char* str)
 {
-  char* begin = str;
+  const char* begin = str;
   int sign_skipped = 0;
   /* 1) skip sign */
   str = skip_sign(str);
@@ -154,9 +154,9 @@ char* find_end_of_integer_number(char* str)
   return (str - begin - sign_skipped <= 0) ? begin : str;
 }
 
-char* find_end_of_quoted_string(char* str)
+const char* find_end_of_quoted_string(const char* str)
 {
-  char* begin = str;
+  const char* begin = str;
   int do_continue = 1;
   if (str)
   {
@@ -185,11 +185,11 @@ char* find_end_of_quoted_string(char* str)
   return str;
 }
 
-char* find_end_of_symbol(char* str)
+const char* find_end_of_symbol(const char* str)
 {
-  static char symbol_initial[] = "!$%&*/:<=>?^_~";
-  static char symbol_constituent[] = "+-.@";
-  static char peculiar_symbol[] = "+-";
+  static const char symbol_initial[] = "!$%&*/:<=>?^_~";
+  static const char symbol_constituent[] = "+-.@";
+  static const char peculiar_symbol[] = "+-";
   if (str)
   {
     if (is_from(*str,peculiar_symbol))
