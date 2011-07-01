@@ -43,6 +43,15 @@ typedef struct sexp_item_tag
 typedef void (*appy_to_item_t) (sexp_item* item, void* data);
 
 /*
+ * Functions operating on atoms
+ * Implemented in sexptoken.c
+ */
+
+/* Print the information about Atom token in simple format */
+void atom_token_print(atom_token* token);
+
+
+/*
  * Functions operating with sexp_items
  * Implemented in sexpitem.c
  */

@@ -114,15 +114,25 @@ atom_token* read_atom_token(const char** str)
   const char* ptr = *str;
   if (ptr)
   {
-     /* determine atom type, if possible */
+    /*  /\* determine atom type, if possible *\/ */
+    /* /\* 1) check if it is an integer  *\/ */
+    /* token = read_atom_token_integer(&ptr); */
+    /* if (!token) /\* 2) check if float *\/ */
+    /*   token = read_atom_token_float(&ptr); */
+    /* if (!token) /\* 3) check if string *\/ */
+    /*   token = read_atom_token_string(&ptr); */
+    /* if (!token) /\* 4) check if symbol or special(NIL) *\/ */
+    /*   token = read_atom_token_symbol(&ptr); */
+
+    /* determine atom type, if possible */
     /* 1) check if it is an integer  */
-    token = read_atom_token_integer(&ptr);
-    if (!token) /* 2) check if float */
-      token = read_atom_token_float(&ptr);
-    if (!token) /* 3) check if string */
+    token = read_atom_token_symbol(&ptr);
+    if (!token) 
       token = read_atom_token_string(&ptr);
-    if (!token) /* 4) check if symbol or special(NIL) */
-      token = read_atom_token_symbol(&ptr);
+    if (!token) 
+      token = read_atom_token_float(&ptr);
+    if (!token)
+      token = read_atom_token_integer(&ptr);
     *str = ptr;
   }
   return token;

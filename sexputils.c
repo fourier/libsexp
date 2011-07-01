@@ -190,6 +190,9 @@ const char* find_end_of_symbol(const char* str)
   static const char symbol_initial[] = "!$%&*/:<=>?^_~";
   static const char symbol_constituent[] = "+-.@";
   static const char peculiar_symbol[] = "+-";
+  /* symbol must be terminated with delimiter */
+  static const char delimiters[] = "();";
+  const char* begin = str;
   if (str)
   {
     if (is_from(*str,peculiar_symbol))
@@ -202,6 +205,9 @@ const char* find_end_of_symbol(const char* str)
                       isdigit(*str) || is_from(*str,symbol_constituent)))
         str++;
     }
+    /* check for terminating delimiter */
+    if (!is_from(*str,delimiters) && !is_from(*str,whitespaces))
+      str = begin;
   }
   return str;
 }

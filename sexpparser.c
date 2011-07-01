@@ -106,7 +106,9 @@ static parser_stack_item* parser_stack_peek_state(parser_stack* stack)
  * items - array of values for every reduced symbol
  * size - items size
  */
-static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
+static sexp_item* handle_rule_reduction(int rule,
+                                        sexp_item** items,
+                                        int do_print)
 {
   sexp_item* result = 0;
   sexp_token* nil_token = sexp_token_alloc(EATOM,atom_token_nil_alloc());
@@ -124,6 +126,9 @@ static sexp_item* handle_rule_reduction(int rule, sexp_item** items)
   switch(rule)
   {
   case 1:
+    assert(items[0]->atom);
+    if (do_print)
+      atom_token_print(items[0]->atom);
   case 2:
     result = items[0];
     /* take ownership */
@@ -223,8 +228,14 @@ sexp_item* parse_sexp_token_list(sexp_token_cont_item* head, int do_print)
           items[j] = item.item_value;
         }
       }
+      /* output the rule */
+      if (do_print)
+        printf("%s  ",grammar_rules_list[number].print_form);
       /* handle grammar rule */
-      item_value = handle_rule_reduction(number, items);
+      item_value = handle_rule_reduction(number, items, do_print);
+      /* there possible some output in handle_rule_reduction */
+      if (do_print)
+        printf("\n");
       /* clear all unused items */
       for ( i = 0; i < grammar_rules_list[number].size; ++ i)
         sexp_item_free(items[i]);
@@ -240,9 +251,7 @@ sexp_item* parse_sexp_token_list(sexp_token_cont_item* head, int do_print)
                         item_value);
       /* push the GOTO(i,A) to the stack (as a state) */
       PUSH_PARSER_STACK(EStackItemState,goto_table[i][A],0);
-      if (do_print)
-        printf("%s\n",grammar_rules_list[number].print_form);
-      /*  */
+
       break;
     default:
       assert(0);

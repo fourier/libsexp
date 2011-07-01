@@ -7,6 +7,34 @@
 #include "sexptoken.h"
 #include "sexpcontainers.h"
 
+/* Print the information about Atom token in simple format */
+void atom_token_print(atom_token* token)
+{
+  if (token)
+  {
+    switch (token->type)
+    {
+    case EIntegerNumber:
+      printf("%d",token->value.int_number);
+      break;
+    case EFloatNumber:
+      printf("%f",token->value.float_number);
+      break;
+    case EString:
+      printf("%s",token->value.string);
+      break;
+    case ESymbol:
+      printf("%s",token->value.symbol);
+      break;
+    case ENil:
+      printf("NIL");
+    default:
+      break;
+    }
+  }
+}
+
+
 atom_token* atom_token_alloc(AtomTokenType type)
 {
   atom_token* token = calloc(1, sizeof(atom_token));

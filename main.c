@@ -6,33 +6,6 @@
 
 const int block_size = 255;
 
-/* Print the information about Atom token in simple format */
-static void atom_token_print(atom_token* token)
-{
-  if (token)
-  {
-    switch (token->type)
-    {
-    case EIntegerNumber:
-      printf("%d",token->value.int_number);
-      break;
-    case EFloatNumber:
-      printf("%f",token->value.float_number);
-      break;
-    case EString:
-      printf("%s",token->value.string);
-      break;
-    case ESymbol:
-      printf("%s",token->value.symbol);
-      break;
-    case ENil:
-      printf("NIL");
-    default:
-      break;
-    }
-  }
-}
-
 
 static void item_print(sexp_item* item, void* data)
 {
@@ -85,7 +58,7 @@ int main(int argc, const char* argv[])
     sexp = sexp_parse(read_buffer);
     free(read_buffer);
     sexp_item_traverse(sexp,item_print,(void*)0);
-  
+    printf("\n");
     sexp_item_free(sexp);
   }
   else
