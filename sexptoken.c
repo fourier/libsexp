@@ -97,12 +97,23 @@ atom_token* atom_token_float_alloc(const char* begin, const char* end)
   return token;
 }
 
+static void unescaped_copy_string(char* to, const char* from, int size)
+{
+  while(size--)
+  {
+    if (*from != '\\')
+      *to++ = *from;
+    from++;
+  }
+}
+
 atom_token* atom_token_string_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(EString);
   int size = end - begin + 1;
   token->value.string = calloc(size, 1);
-  memcpy(token->value.string,begin,size - 1);
+  /* memcpy(token->value.string,begin,size - 1); */
+  unescaped_copy_string(token->value.string,begin,size-1);
   return token;
 }
 

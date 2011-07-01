@@ -176,6 +176,14 @@ const char* find_end_of_quoted_string(const char* str)
            */
           do_continue = str > begin + 1 && *(str-1) == '\\';
         }
+        else if (*str == ';')   /* comment found inside the string */
+        {
+          if ( *(str-1) != '\\')
+          {
+            str = begin;
+            break;
+          }
+        }
         str++;
         if (!do_continue)
           break;
