@@ -89,7 +89,7 @@ const char* skip_whitespaces(const char* str)
 {
   if (str)
   {
-    while (is_from(*str, whitespaces))
+    while (*str && is_from(*str, whitespaces))
       str++;
   }
   return str;
@@ -98,7 +98,7 @@ const char* skip_whitespaces(const char* str)
 const char* skip_comment(const char* str)
 {
   if (*str == ';')
-    while ( str && *str != '\n')
+    while ( *str && *str != '\n')
       str++;
   return str;
 }

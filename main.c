@@ -9,7 +9,6 @@ const int block_size = 255;
 
 static void item_print(sexp_item* item, void* data)
 {
-  int count = 0, i = 0;
   data = 0;                     /* to reduce compiler warnings */
   if (item->atom)
   {
@@ -19,9 +18,6 @@ static void item_print(sexp_item* item, void* data)
   else
   {
     printf("Cons (");
-    /* count = sexp_item_length(item); */
-    /* for ( ; i < count; ++ i) */
-    /*   item_print(sexp_item_nth(item,i),data); */
   }
 }
 

@@ -69,7 +69,8 @@ void parser_stack_push(parser_stack* stack, parser_stack_item item)
     {
       stack->items =
         (parser_stack_item*)realloc(stack->items,
-                                    stack->_allocated + parser_stack_step);
+                                    sizeof(parser_stack_item)*
+                                    (stack->_allocated + parser_stack_step));
       stack->_allocated += parser_stack_step;
       stack->items[stack->top++] = item;
     }
@@ -251,7 +252,6 @@ sexp_item* parse_sexp_token_list(sexp_token_cont_item* head, int do_print)
                         item_value);
       /* push the GOTO(i,A) to the stack (as a state) */
       PUSH_PARSER_STACK(EStackItemState,goto_table[i][A],0);
-
       break;
     default:
       assert(0);
