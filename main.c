@@ -62,6 +62,7 @@ int main(int argc, const char* argv[])
     printf("\n");    
     sexp_item_traverse(sexp,item_print,(void*)0);
     printf("\n");
+
     sexp_item_free(sexp);
   }
   else

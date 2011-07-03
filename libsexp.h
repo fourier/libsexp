@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 #ifndef _LIBSEXP_H_
 #define _LIBSEXP_H_
 
@@ -65,6 +66,15 @@ int sexp_item_is_nil(sexp_item* item);
 int sexp_item_length(sexp_item* item);
 /* return i-th element of the list item, 0 if not found */
 sexp_item* sexp_item_nth(sexp_item* item, int i);
+
+/*
+ * returns a pointer to the attribute value specified by attribute name.
+ * Example: given list item = (function 1 2 :test 3.14)
+ * Call: sexp_item_attribute(item,"test") will return pointer to
+ * the item containing 3.14
+ * If no attribute or its value found returns nil
+ */
+sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute);
 
 /* sexp item tree traversal */
 void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
