@@ -266,29 +266,3 @@ sexp_item* parse_sexp_token_list(sexp_token_cont_item* head, int do_print)
 }
 
 
-sexp_item* sexp_parse(const char* text)
-{
-  const char* p = text;
-
-  /* list of tokens */
-  sexp_token_cont_item *head = 0;
-  sexp_token* token = 0;
-
-  /* parser result */
-  sexp_item* sexp;
-
-  /* 1. Lexer */
-  token = read_sexp_token(&p);  
-  if (token)
-    head = sexp_token_cont_item_alloc(token);
-  while ( (token = read_sexp_token(&p)))
-    sexp_token_list_add(head,token);
-
-  /* 2. Parser */
-  sexp = parse_sexp_token_list(head,1);
-  if (!sexp)
-    fprintf(stderr,"Unable to parse input!\n");
-  /* 3. Free the allocated memory  */
-  head = sexp_token_cont_list_free(head);
-  return sexp;
-}

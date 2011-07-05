@@ -3,7 +3,7 @@
 
 # to create sexpgrammar.[ch] use the following command:
 # sbcl --load sexpgrammar.lisp sexpgrammar
-CC = gcc
+CC = gcc-mp-4.5
 
 CFLAGS = -ggdb -pg -ansi -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .

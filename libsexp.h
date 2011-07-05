@@ -51,6 +51,8 @@ typedef void (*appy_to_item_t) (sexp_item* item, void* data);
 /* Print the information about Atom token in simple format */
 void atom_token_print(atom_token* token);
 
+/* get the number from the atom as a floating-point value */
+double atom_token_number(atom_token* token);
 
 /*
  * Functions operating with sexp_items
@@ -76,13 +78,24 @@ sexp_item* sexp_item_nth(sexp_item* item, int i);
  */
 sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute);
 
+/*
+ * Check if item is symbol. If symbol is not 0, also test if the item
+ * is symbol with value from the 2nd argument(regardless of the character
+ * case)
+ */
+int sexp_item_is_symbol(sexp_item* item, const char* symbol);
+
+/*
+ * Check if item is a list starting with symbol. If symbol != 0,
+ * starts if the list starts with this symbol
+ */
+int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol);
+
 /* sexp item tree traversal */
 void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
 
 /*
  * Parse function. Returns the parsed root item when parsing is complete
- * Implemented in sexpparse.c
- * 
  */
 sexp_item* sexp_parse(const char* text);
 
