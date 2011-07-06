@@ -21,7 +21,7 @@ double atom_token_number(atom_token* token)
     result = token->value.int_number;
     break;
   case EFloatNumber:
-    result = token->value.int_number;
+    result = token->value.float_number;
     break;
   case ESymbol:
   case EString:
