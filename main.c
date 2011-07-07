@@ -58,16 +58,15 @@ int main(int argc, const char* argv[])
       fclose(file);
 
     sexp = sexp_parse(read_buffer);
-    free(read_buffer);
     printf("\n");    
     sexp_item_traverse(sexp,item_print,(void*)0);
     printf("\n");
-
     sexp_item_free(sexp);
   }
   else
   {
     printf("Unable to open file\n");
   }
+  free(read_buffer);
   return 0;
 }
