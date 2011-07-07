@@ -1,9 +1,26 @@
 # -*- Mode: makefile; -*-
-# Makefile for the SexpLib project
+
+# Copyright (C) 2011 Alexey Veretennikov (alexey dot veretennikov at gmail.com)
+# 
+#	This file is part of Libsexp.
+#
+# Libsexp is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Libsexp is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
+
 
 # to create sexpgrammar.[ch] use the following command:
 # sbcl --load sexpgrammar.lisp sexpgrammar
-CC = gcc-mp-4.5
+CC = gcc
 
 CFLAGS = -ggdb -pg -ansi -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .

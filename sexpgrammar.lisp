@@ -1,3 +1,24 @@
+;; -*- Mode: lisp; -*-
+
+;; Copyright (C) 2011 Alexey Veretennikov (alexey dot veretennikov at gmail.com)
+
+;; This file is part of Libsexp.
+
+;; Libsexp is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU Lesser General Public License as published
+;; by the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; Libsexp is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU Lesser General Public License for more details.
+
+;; You should have received a copy of the GNU Lesser General Public License
+;; along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
 (defconstant +dot+ '\.)
 (defconstant +empty+ 'empty)
 (defconstant +end+   '$)
@@ -679,6 +700,25 @@ with conjunction with first-function"
                               :direction :output
                               :if-exists :supersede)
         (format header "/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */~%")
+        (format header "/*
+ Copyright (C) 2011 Alexey Veretennikov (alexey dot veretennikov at gmail.com)
+ 
+ This file is part of Libsexp.
+
+ Libsexp is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published
+ by the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Libsexp is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+")
         ;; opening include-guard
         (format header "#ifndef ~a~%#define ~a~%~%" include-guard include-guard)
         (enum-formatter header "ParserState"
@@ -719,6 +759,25 @@ with conjunction with first-function"
                               :direction :output
                               :if-exists :supersede)
         (format source "/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */~%")
+        (format source "/*
+ Copyright (C) 2011 Alexey Veretennikov (alexey dot veretennikov at gmail.com)
+ 
+ This file is part of Libsexp.
+
+ Libsexp is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published
+ by the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Libsexp is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
+*/
+")
         (format source "#include \"~a\"~%~%" (file-namestring filename-header))
         ;; terminals
         (format source "~a~%" (concatenate 'string
