@@ -832,7 +832,7 @@ with conjunction with first-function"
           (format source "~{  ~a~^,~%~}" (reverse goto-rows))
           (format source "~%};~%~%"))))))
 
-(when (> (length *posix-argv*) 0)
+(when (> (length *posix-argv*) 1)
   (print-slr-table-and-grammar-to-file *grammar-2*
                                        (slr-table *grammar-2*)
                                        (second *posix-argv*)))

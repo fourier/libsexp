@@ -64,7 +64,7 @@ parser_stack* parser_stack_free(parser_stack* stack)
 
 void parser_stack_push(parser_stack* stack, parser_stack_item item)
 {
-  /* Check if stack is not empty. Create items otherwize */
+  /* Check if stack is not empty. Create items otherwise */
   if ( !stack->items)
   {
     stack->items = calloc(parser_stack_step,sizeof(parser_stack_item));
