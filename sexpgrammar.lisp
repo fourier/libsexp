@@ -111,6 +111,27 @@
                             (list 'E (list '1 'E))          ; (1) E -> 1 E
                             (list 'E '1))))                 ; (2) E -> 1
 
+;; BUG of the FIRST function on this grammar. First(S) != {epsilon, (}
+;; shall be First(S) = {epsilon, (, x, y}
+
+(defparameter *grammar-5* (make-grammar
+                           :terminals (list '\( '\) 'x 'y)
+                           :nonterminals (list 'S1 'S 'A 'B)
+                           :start-symbol 'S1
+                           :rules
+                           (list
+                            (list 'S1 'S)          ; (0) S1 -> S
+                            (list 'S +empty+)       ; (1) S -> epsilon
+                            (list 'S (list 'A '\( 'S '\) 'B)) ; (2) S -> A(S)B
+                            (list 'A 'S)                    ; (3) A -> S
+                            (list 'A 'x)                    ; (4) A -> x
+                            (list 'A +empty+)               ; (5) A -> epsilon
+                            (list 'A (list 'S 'B)           ; (6) A -> SB
+                            (list 'B 'y)                    ; (7) B -> y
+                            (list 'B (list 'S 'B))))))      ; (8) B -> SB
+
+
+
 (defun push-back (x l)
   "Non-modifying function for appending element x to the end of the list l"
   (append l (list x)))
@@ -836,7 +857,7 @@ with conjunction with first-function"
   (print-slr-table-and-grammar-to-file *grammar-2*
                                        (slr-table *grammar-2*)
                                        (second *posix-argv*)))
-(quit)
+;;(quit)
     
 ;; ;;
 ;; ;; Tests
