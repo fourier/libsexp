@@ -43,7 +43,6 @@ Typical usage is:
 ```c
 #include <libsexp.h>
 ```
-
 1. Define some traversal function, like:
 
 ```c
@@ -52,25 +51,21 @@ void traverse(sexp_item* item, void* data)
 /* do something with item */
 }
 ```
-
 2. Create a pointer to sexp_item variable:
 
 ```c
 sexp_item* item;
 ```
-
 3. Parse the buffer and store parsed tree to this variable:
 
 ```c
 item = sexp_parse(buffer);
 ```
-
 4. Traverse through the parsed tree
 
 ```c
 sexp_item_traverse(item,traverse,(void*)data);
 ```
-
 5. Free allocated memory
 
 ```c
