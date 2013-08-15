@@ -16,52 +16,63 @@ atom, like:
 3.14
 </pre>
 or single list:
-```lisp
+<pre>
 (hello
   (the world))
-```
+</pre>
 It doesn't support set of lists in its input data, like:
-```lisp
+<pre>
 (hello)
 (the world)
-```
+</pre>
 so use it carefully with this assumption.
 
 
 Usage.
 ------
 
-In order to use the library build it and statically link against libsexp.a
-Typically it shall be enough to use the only header libsexp.h.
+In order to use the library build it and statically link against **libsexp.a**
+Typically it shall be enough to use the only header **libsexp.h**.
 
-Usage example can be found in main.c.
+Usage example can be found in **main.c**.
 
 Typical usage is:
 
 0. Include library header:
+
 ```c
 #include <libsexp.h>
 ```
+
 1. Define some traversal function, like:
+
 ```c
 void traverse(sexp_item* item, void* data)
 {
 /* do something with item */
 }
 ```
+
 2. Create a pointer to sexp_item variable:
+
 ```c
 sexp_item* item;
 ```
+
 3. Parse the buffer and store parsed tree to this variable:
+
 ```c
 item = sexp_parse(buffer);
 ```
+
 4. Traverse through the parsed tree
+
 ```c
 sexp_item_traverse(item,traverse,(void*)data);
 ```
+
 5. Free allocated memory
+
 ```c
 sexp_item_free(item);
 ```
@@ -89,7 +100,8 @@ Also one can use the following functions for manipulating with lists:
 ```c
 int sexp_item_length(sexp_item* item);
 ```
- - returns the length of the list
+- returns the length of the list
+
 ```c
 sexp_item* sexp_item_nth(sexp_item* item, int i);
 ```
@@ -135,29 +147,33 @@ argument is 0), and if symbol argument points to some string(no matter upper-cas
 or down-cased) it will also compare item to this symbol name. For example if
 sexp_item* item is of type Symbol 'HELLO', the following call will return non-zero
 value:
+
 ```c
 sexp_item_is_symbol(item,"hello")
 ```
+
 ```c
 int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol);
 ```
- - By given the item of type list compare returns nonzero value if the first
+- By given the item of type list compare returns nonzero value if the first
 element is of type Symbol, and, if symbol argument is not zero, compares the
 first element with its value (regardless of the case).
-Example: given sexp_item* item with contents (Hello 0 1)
-sexp_item_starts_with_symbol(item,"hello") will return nonzero value.
+Example: given ```sexp_item*``` item with contents <pre>(Hello 0 1)</pre>
+```sexp_item_starts_with_symbol(item,"hello")``` will return nonzero value.
 
 ```c
 sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute);
 ```
- - search in the list by 'attributes'. Attributes are subsequent pair of list
+- search in the list by 'attributes'. Attributes are subsequent pair of list
 elements, first of them is of type Symbol starting with ':', and second of any
 type. Lists with attributes for example are: (:hello 1 :the 2). Here we have
 2 attribute pairs: ":hello" with the value 1 and ":the" with the value 2.
 This function searches through the list for a given attribute without
 preceding ':' character. For example by given
-sexp_item* item = (:hello 1 :the 1) the following call
+```sexp_item* item = (:hello 1 :the 1)``` the following call
+```c
 sexp_item_attribute(item,"Hello")
-will return the sexp_item pointing to 1.
+```
+will return the **sexp_item** pointing to 1.
 
 
