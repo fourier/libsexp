@@ -80,6 +80,8 @@ close-paren          ")"
 {close-paren}           {
     add_to_head(sexp_token_alloc(ECLOSEPAREN,0));
     }
+    
+;.*(\r?\n)   {printf("Comment");}
 
 [[:space:]] {}
 
