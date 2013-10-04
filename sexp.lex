@@ -21,6 +21,11 @@ double-quote          "\""
 escaped-double-quote {escape}{double-quote}
 string               {double-quote}([[:graph:]]|[[:space:]]|{escaped-double-quote})*{double-quote}
 
+symbol-initial       [[:alpha:]]|"!"|"$"|"%"|"&"|"*"|"/"|":"|"<"|"="|">"|"?"|"^"|"_"|"~"
+symbol-constituent   {symbol-initial}|[[:digit:]]|"+"|"-"|"."|"@"
+peculiar-symbol      "+"|"-"|"..."
+
+
 %%
 
 {integer-number}    {printf("Integer %d", atoi(yytext));}
