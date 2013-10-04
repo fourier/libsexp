@@ -21,6 +21,7 @@
 # to create sexpgrammar.[ch] use the following command:
 # sbcl --load sexpgrammar.lisp sexpgrammar
 CC = gcc
+LEX = flex
 
 CFLAGS = -ggdb -pg --std=c99 -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .
@@ -29,10 +30,19 @@ LINKFLAGS = -L. -lsexp
 OUTPUT_SRC = main.c
 SOURCES := $(wildcard *.c)
 HEADERS := $(wildcard *.h)
-OBJECTS := $(patsubst %.c,%.o,$(SOURCES))
+LEXES   := $(wildcard *.lex)
+OBJECTS := $(patsubst %.c,%.o,$(SOURCES)) $
 OBJECTS_LIB := $(filter-out $(patsubst %.c,%.o,$(OUTPUT_SRC)),$(OBJECTS))
 OUTPUT = sexptest
 OUTPUT_LIB = libsexp.a
+
+.PHONY: all clean
+
+%.yy.o: %.yy.c
+	$(CC) -c -o $@ $<
+
+%.yy.c: %.lex
+	$(LEX) -o $@ $<
 
 %.o : %.c %.h
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
@@ -44,7 +54,6 @@ $(OUTPUT_LIB): $(OBJECTS)
 	$(RM) -f $(OUTPUT_LIB)
 	$(AR) cr $(OUTPUT_LIB) $(OBJECTS_LIB)
 	ranlib $(OUTPUT_LIB)
-
 
 
 all: $(OUTPUT)
