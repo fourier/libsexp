@@ -24,13 +24,14 @@ string               {double-quote}([[:graph:]]|[[:space:]]|{escaped-double-quot
 symbol-initial       [[:alpha:]]|"!"|"$"|"%"|"&"|"*"|"/"|":"|"<"|"="|">"|"?"|"^"|"_"|"~"
 symbol-constituent   {symbol-initial}|[[:digit:]]|"+"|"-"|"."|"@"
 peculiar-symbol      "+"|"-"|"..."
-
+symbol               {symbol-initial}{symbol-constituent}*|{peculiar-symbol}
 
 %%
 
 {integer-number}    {printf("Integer %d", atoi(yytext));}
 {floating-point-number} {printf("Float %f", atof(yytext));}
 {string} {printf("String: '%s'", yytext);}
+{symbol} {printf("Symbol: '%s'", yytext);}
 
 [[:space:]] {}
 
