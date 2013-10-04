@@ -48,21 +48,46 @@ close-paren          ")"
 
 %%
 
-{integer-number}    {printf("Integer %d", atoi(yytext));}
-{floating-point-number} {printf("Float %f", atof(yytext));}
-{string} {printf("String: '%s'", yytext);}
-{symbol-nil} {printf("Nil");}
-{symbol} {printf("Symbol: '%s'", yytext);}
-{open-paren} {printf("Open paren");}
-{close-paren} {printf("Close paren");}
+{integer-number}        {
+    add_to_head(sexp_token_alloc(EATOM,
+                                 atom_token_integer_alloc(yytext,yytext+yyleng)));
+    }
+    
+{floating-point-number} {
+    add_to_head(sexp_token_alloc(EATOM,
+                                 atom_token_float_alloc(yytext,yytext+yyleng)));
+    }
+    
+{string}                {
+    add_to_head(sexp_token_alloc(EATOM,
+                                 atom_token_string_alloc(yytext,yytext+yyleng)));
+    }
 
+{symbol-nil}            {
+    add_to_head(sexp_token_alloc(EATOM,
+                                 atom_token_nil_alloc()));
+    }
+
+{symbol}                {
+    add_to_head(sexp_token_alloc(EATOM,
+                                 atom_token_symbol_alloc(yytext,yytext+yyleng)));
+    }
+    
+{open-paren}            {
+    add_to_head(sexp_token_alloc(EOPENPAREN,0));
+    }
+
+{close-paren}           {
+    add_to_head(sexp_token_alloc(ECLOSEPAREN,0));
+    }
 
 [[:space:]] {}
 
 %%
     
-sexp_token_cont_item* tokenize()
+sexp_token_cont_item* tokenize(const char* str)
 {
+  yy_scan_string(str);
   while(yylex()>0);
   return head;
 }

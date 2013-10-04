@@ -115,6 +115,8 @@ int sexp_item_is_symbol(sexp_item* item, const char* symbol)
   return result;
 }
 
+extern sexp_token_cont_item* tokenize(const char* str);
+
 sexp_item* sexp_parse(const char* text)
 {
   const char* p = text;
@@ -127,12 +129,14 @@ sexp_item* sexp_parse(const char* text)
   sexp_item* sexp;
 
   /* 1. Lexer */
+#if 0
   token = read_sexp_token(&p);  
   if (token)
     head = sexp_token_cont_item_alloc(token);
   while ( (token = read_sexp_token(&p)))
     sexp_token_list_add(head,token);
-
+#endif
+  head = tokenize(text);
   /* 2. Parser */
   sexp = parse_sexp_token_list(head,0);
   if (!sexp)

@@ -25,27 +25,30 @@ LEX = flex
 
 CFLAGS = -ggdb -pg --std=c99 -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .
-LINKFLAGS = -L. -lsexp
+LINKFLAGS = -L. -lsexp -lfl
 
 OUTPUT_SRC = main.c
 SOURCES := $(wildcard *.c)
 HEADERS := $(wildcard *.h)
 LEXES   := $(wildcard *.lex)
-OBJECTS := $(patsubst %.c,%.o,$(SOURCES)) $
+OBJECTS := $(patsubst %.c,%.o,$(SOURCES)) libsexp.yy.o
 OBJECTS_LIB := $(filter-out $(patsubst %.c,%.o,$(OUTPUT_SRC)),$(OBJECTS))
 OUTPUT = sexptest
 OUTPUT_LIB = libsexp.a
 
 .PHONY: all clean
 
-%.yy.o: %.yy.c
-	$(CC) -c -o $@ $<
-
-%.yy.c: %.lex
-	$(LEX) -o $@ $<
+all: $(OUTPUT)
 
 %.o : %.c %.h
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+libsexp.yy.o: libsexp.yy.c
+	$(CC) -c -o $@ $<
+
+libsexp.yy.c: sexp.l
+	$(LEX) -o $@ $<
+
 
 $(OUTPUT): $(OUTPUT_LIB) 
 	$(CC) $(patsubst %.c,%.o,$(OUTPUT_SRC)) -o $(OUTPUT) $(LINKFLAGS)
@@ -55,15 +58,11 @@ $(OUTPUT_LIB): $(OBJECTS)
 	$(AR) cr $(OUTPUT_LIB) $(OBJECTS_LIB)
 	ranlib $(OUTPUT_LIB)
 
-
-all: $(OUTPUT)
-
 lint:
 	splint *.c
 
-.PHONY : clean
 clean :
-	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB)
+	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB) libsexp.yy.c 
 
 check-syntax: 
 	gcc -o nul -S ${CHK_SOURCES} 
