@@ -47,7 +47,7 @@ libsexp.yy.o: libsexp.yy.c
 	$(CC) -c -o $@ $<
 
 libsexp.yy.c: sexp.l
-	$(LEX) -o $@ $<
+	$(LEX) -f -o $@ $<
 
 
 $(OUTPUT): $(OUTPUT_LIB) 
