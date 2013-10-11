@@ -22,6 +22,7 @@
 # sbcl --load sexpgrammar.lisp sexpgrammar
 CC = gcc
 LEX = flex
+YACC = bison
 
 CFLAGS = -ggdb -pg --std=c99 -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .
@@ -31,7 +32,7 @@ OUTPUT_SRC = main.c
 SOURCES := $(wildcard *.c)
 HEADERS := $(wildcard *.h)
 LEXES   := $(wildcard *.lex)
-OBJECTS := $(patsubst %.c,%.o,$(SOURCES)) libsexp.yy.o
+OBJECTS := $(patsubst %.c,%.o,$(SOURCES)) libsexp.yy.o libsexp.tab.o
 OBJECTS_LIB := $(filter-out $(patsubst %.c,%.o,$(OUTPUT_SRC)),$(OBJECTS))
 OUTPUT = sexptest
 OUTPUT_LIB = libsexp.a
@@ -43,7 +44,13 @@ all: $(OUTPUT)
 %.o : %.c %.h
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
-libsexp.yy.o: libsexp.yy.c
+libsexp.tab.o: libsexp.tab.c
+	$(CC) -c -o $@ $<
+
+libsexp.tab.c: sexp.y
+	$(YACC) --defines=libsexp.tab.h -o libsexp.tab.c -o $@ $<
+
+libsexp.yy.o: libsexp.yy.c libsexp.tab.c
 	$(CC) -c -o $@ $<
 
 libsexp.yy.c: sexp.l

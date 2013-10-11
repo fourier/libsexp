@@ -10,7 +10,7 @@ int yylex(void);
 
 static void item_print(sexp_item* item, void* data);
 
-sexp_item* parsed = 0;
+static sexp_item* g_parsed = 0;
 
 %}
 
@@ -30,7 +30,7 @@ sexp_item* parsed = 0;
 %%
 program       :
             {}
-     | sexp {parsed = $1;};
+     | sexp {g_parsed = $1;};
 sexp          :
        ATOM   {$$ = sexp_item_create_atom($1);}
      | list   {$$ = $1;};
@@ -62,7 +62,7 @@ static void item_print(sexp_item* item, void* data)
   }
 }
 
-
+#if 0
 int main( int argc, char *argv[] )
 {
 #if 0    
@@ -73,6 +73,14 @@ int main( int argc, char *argv[] )
      /*yydebug = 1;*/
      yyparse ();
      printf("\n");sexp_item_traverse(parsed,item_print,(void*)0);printf("\n");
+}
+#endif
+
+sexp_item* sexp_parse(const char* read_buffer)
+{
+    yy_scan_string(read_buffer);
+    if (yyparse() == 0) return g_parsed;
+    return 0;
 }
 
 

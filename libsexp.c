@@ -26,8 +26,6 @@
 #include <assert.h>
 
 #include "libsexp.h"
-#include "sexplexer.h"
-#include "sexpparser.h"
 #include "sexptoken.h"
 
 double atom_token_number(atom_token* token)
@@ -115,6 +113,7 @@ int sexp_item_is_symbol(sexp_item* item, const char* symbol)
   return result;
 }
 
+#if 0
 extern sexp_token_cont_item* tokenize(const char* str);
 
 sexp_item* sexp_parse(const char* text)
@@ -145,3 +144,4 @@ sexp_item* sexp_parse(const char* text)
   head = sexp_token_cont_list_free(head);
   return sexp;
 }
+#endif
