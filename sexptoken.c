@@ -25,7 +25,6 @@
 #include <ctype.h>
 
 #include "sexptoken.h"
-#include "sexpcontainers.h"
 
 /* Print the information about Atom token in simple format */
 void atom_token_print(atom_token* token)
@@ -153,34 +152,4 @@ atom_token* atom_token_nil_alloc()
 {
   atom_token* token = atom_token_alloc(ENil);
   return token;
-}
-
-
-sexp_token* sexp_token_alloc(TerminalType type, atom_token* atom)
-{
-  sexp_token* token = calloc(1, sizeof(sexp_token));
-  token->type = type;
-  token->atom = atom;
-  return token;
-}
-
-
-sexp_token* sexp_token_free(sexp_token* token)
-{
-  if (token)
-  {
-    switch (token->type)
-    {
-    case EATOM:
-      token->atom = atom_token_free(token->atom);
-      break;
-    case EOPENPAREN:
-    case ECLOSEPAREN:
-    case EEND:
-    default:
-      break;
-    }
-    free(token);
-  }
-  return (sexp_token*)0;
 }

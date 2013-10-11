@@ -47,48 +47,10 @@
   }
 
 
-DEFINE_SEXP_LIST_ALLOC(sexp_token_cont_item,sexp_token)
-DEFINE_SEXP_LIST_FREE(sexp_token_cont_item,sexp_token)
-
 DEFINE_SEXP_LIST_ALLOC(sexp_item_cont_item,sexp_item)
 DEFINE_SEXP_LIST_FREE(sexp_item_cont_item,sexp_item)
 
 /* TODO: parametrize functions for working with list and stack! */
-
-static void sexp_token_cont_add_item(sexp_token_cont_item* head,
-                                     sexp_token_cont_item* item)
-{
-  if (head && item)
-  {
-    while (head->next)
-      head = head->next;
-    head->next = item;
-  }
-}
-
-sexp_token_cont_item* sexp_token_list_add(sexp_token_cont_item* head,
-                                          sexp_token* token)
-{
-  sexp_token_cont_item* item = sexp_token_cont_item_alloc(token);
-  sexp_token_cont_add_item(head,item);
-  return item;
-}
-
-sexp_token_cont_item* sexp_token_cont_list_free(sexp_token_cont_item* head)
-{
-  sexp_token_cont_item* prev;
-  if (head)
-  {
-    while (head->next)
-    {
-      prev = head;
-      head = head->next;
-      prev = sexp_token_cont_item_free(prev);
-    }
-    head = sexp_token_cont_item_free(head);
-  }
-  return (sexp_token_cont_item*)0;
-}
 
 
 sexp_item_cont_item* sexp_item_stack_push(sexp_item_cont_item* top,

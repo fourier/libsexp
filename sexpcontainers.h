@@ -41,7 +41,6 @@
     struct SEXP_LIST_NAME##_tag* next;                      \
   } SEXP_LIST_NAME
 
-DECLARE_SEXP_LIST(sexp_token_cont_item,sexp_token);
 DECLARE_SEXP_LIST(sexp_item_cont_item, sexp_item);
 
 /*
@@ -55,17 +54,7 @@ DECLARE_SEXP_LIST(sexp_item_cont_item, sexp_item);
   SEXP_LIST_NAME* SEXP_LIST_NAME##_free(SEXP_LIST_NAME* item)
 
 /*
- * Alloc/Free for sexp_token_cont_item structure
- */
-
-/* Allocate memory for the next list item */
-DECLARE_SEXP_LIST_ALLOC(sexp_token_cont_item,sexp_token);
-
-/* Free allocated memory for the list item and its data  */
-DECLARE_SEXP_LIST_FREE(sexp_token_cont_item);
-
-/*
- * Alloc/Free for sexp_token_cont_item structure
+ * Alloc/Free for sexp_item_cont_item structure
  */
 
 /* Allocate memory for the next list item */
@@ -74,20 +63,6 @@ DECLARE_SEXP_LIST_ALLOC(sexp_item_cont_item, sexp_item);
 /* Free allocated memory for the list item and its data  */
 DECLARE_SEXP_LIST_FREE(sexp_item_cont_item);
 
-
-/*
- * List container functions
- */
-
-/* Free allocated memory for the whole list */
-sexp_token_cont_item* sexp_token_cont_list_free(sexp_token_cont_item* head);
-
-/*
- * Append token to the end of the token list and return the
- * list item
- */
-sexp_token_cont_item* sexp_token_list_add(sexp_token_cont_item* head,
-                                          sexp_token* token);
 
 /*
  * Stack container functions

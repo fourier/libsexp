@@ -25,7 +25,7 @@
 #include "libsexp.h"
 
 /* create sexp_item from token, taking ownership of the atom */
-sexp_item* sexp_item_create_atom(sexp_token* from);
+sexp_item* sexp_item_create_atom(atom_token* atom);
 sexp_item* sexp_item_create_cons(sexp_item* car, sexp_item* cdr);
 
 #endif /* _SEXPITEM_H_ */

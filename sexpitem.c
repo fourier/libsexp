@@ -26,11 +26,10 @@
 #include "sexpcontainers.h"
 
 
-sexp_item* sexp_item_create_atom(sexp_token* from)
+sexp_item* sexp_item_create_atom(atom_token* atom)
 {
   sexp_item* result = calloc(sizeof(sexp_item),1);
-  result->atom = from->atom;
-  from->atom = 0;
+  result->atom = atom;
   return result;
 }
 
