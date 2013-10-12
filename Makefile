@@ -17,9 +17,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
 
-
-# to create sexpgrammar.[ch] use the following command:
-# sbcl --load sexpgrammar.lisp sexpgrammar
 CC = gcc
 LEX = flex
 YACC = bison
@@ -48,7 +45,7 @@ libsexp.tab.o: libsexp.tab.c
 	$(CC) -c -ggdb -pg -o $@ $<
 
 libsexp.tab.c: sexp.y
-	$(YACC) --defines=libsexp.tab.h -o libsexp.tab.c -o $@ $<
+	$(YACC) -y --defines=libsexp.tab.h -o libsexp.tab.c -o $@ $<
 
 libsexp.yy.o: libsexp.yy.c libsexp.tab.c
 	$(CC) -c -ggdb -pg -o $@ $<
@@ -69,7 +66,7 @@ lint:
 	splint *.c
 
 clean :
-	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB) libsexp.yy.c 
+	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB) libsexp.yy.c libsexp.tab.*
 
 check-syntax: 
 	gcc -o nul -S ${CHK_SOURCES} 

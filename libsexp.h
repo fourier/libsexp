@@ -115,9 +115,17 @@ int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol);
 void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
 
 /*
- * Parse functions. Returns the parsed root item when parsing is complete
+ * Main parse function - parses from file.
+ * Returns the parsed root item when parsing is complete
+ * or zero pointer if parsing failed
  */
 sexp_item* sexp_parse_file(FILE* input);
+
+/*
+ * Auxulary parse function - parses from null-terminated string.
+ * Returns the parsed root item when parsing is complete
+ * or zero pointer if parsing failed
+ */
 sexp_item* sexp_parse_str(const char* read_buffer);
 
 #endif /* _LIBSEXP_H_ */

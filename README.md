@@ -1,6 +1,6 @@
 Libsexp
 =======
-Copyright (C) 2011 Alexey Veretennikov (alexey dot veretennikov at gmail dot com)
+Copyright (C) 2011-2013 Alexey Veretennikov (alexey dot veretennikov at gmail dot com)
 
 
 Description.
@@ -31,7 +31,7 @@ so use it carefully with this assumption.
 Usage.
 ------
 
-In order to use the library build it and statically link against **libsexp.a**
+In order to use the library build it and statically link against **libsexp.a** and FLEX library (**-lfl**)
 Typically it shall be enough to use the only header **libsexp.h**.
 
 Usage example can be found in **main.c**.
@@ -56,11 +56,17 @@ void traverse(sexp_item* item, void* data)
     ```c
 sexp_item* item;
 ```
-3. Parse the buffer and store parsed tree to this variable:
+3. Parse the file or zero-terminated buffer and store parsed tree to this variable, like this:
 
     ```c
-item = sexp_parse(buffer);
+file = fopen("myfile.sexp","rt");
+item = sexp_parse_file(file);
 ```
+or
+    ```c
+item = sexp_parse_str("(:test-strings number 1 is (\"hello\" \"world\"))");
+```
+
 4. Traverse through the parsed tree
 
     ```c
