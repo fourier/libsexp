@@ -23,12 +23,13 @@
 
 #include "libsexp.h"
 
-const int block_size = 255;
+#define READ_FILE_TO_MEMORY 0
 
+const int block_size = 16384;
 
 static void item_print(sexp_item* item, void* data)
 {
-  data = 0;                     /* to reduce compiler warnings */
+  (void)data;                     /* to reduce compiler warnings */
   if (item->atom)
   {
     atom_token_print(item->atom);
@@ -40,28 +41,17 @@ static void item_print(sexp_item* item, void* data)
   }
 }
 
-
-int main(int argc, const char* argv[])
+#if READ_FILE_TO_MEMORY
+static char* read_file(FILE* file)
 {
-  /* input file */
-  FILE* file = stdin;
-
   /* buffer to read to */
-  char* read_buffer = calloc(block_size+1,1);
-
-  /* parser result */
-  sexp_item* sexp;
-  
+  char* read_buffer = 0;
   /* auxulary counters */
   int read_chunk = 0,read = 0;
-  int read_from_file = argc > 1;
-
-  /* set the file to read from */
-  if ( read_from_file )
-    file = fopen(argv[1],"rt");
 
   if (file)
   {
+    read_buffer = calloc(block_size+1,1);
     /* read file contents  */
     while(!feof(file))
     {
@@ -71,24 +61,71 @@ int main(int argc, const char* argv[])
       read_buffer = (char*)realloc(read_buffer,read + block_size);
     }
     read_buffer[read] = '\0';
-  
-    /* close the file if necessary */
-    if ( read_from_file)
-      fclose(file);
+  }
+  return read_buffer;
+}
+#endif
 
-    sexp = sexp_parse(read_buffer);
-    if (sexp)
+static void parse_file(FILE* file)
+{
+  /* parser result */
+  sexp_item* sexp;
+  /* buffer to read to */
+#if READ_FILE_TO_MEMORY
+  char* read_buffer = 0;
+#endif
+  if (file)
+  {
+#if READ_FILE_TO_MEMORY
+    /* read file contents  */
+    read_buffer = read_file(file);
+    
+    if (read_buffer)
     {
-      printf("\n");    
-      sexp_item_traverse(sexp,item_print,(void*)0);
-      printf("\n");
-      sexp_item_free(sexp);
+      /* parse read contents */
+      sexp = sexp_parse_str(read_buffer);
+#else
+      sexp = sexp_parse_file(file);
+#endif
+      if (sexp)
+      {
+        printf("\n");    
+        sexp_item_traverse(sexp,item_print,(void*)0);
+        printf("\n");
+        sexp_item_free(sexp);
+      }
+#if READ_FILE_TO_MEMORY      
+      free(read_buffer);
+    }
+#endif
+  }
+}
+
+int main(int argc, const char* argv[])
+{
+  /* input file */
+  FILE* file = stdin;
+  int i = 1;
+  
+  /* set the file to read from */
+  if ( argc > 1 )
+  {
+    for (; i < argc; ++ i)
+    {
+      file = fopen(argv[i],"rt");
+      if (file)
+      {
+        parse_file(file);
+        /* close the file if necessary */
+        fclose(file);
+      }
+      else
+        fprintf(stderr,"Unable to open file %s\n", argv[i]);
     }
   }
   else
   {
-    fprintf(stderr,"Unable to open file\n");
+    parse_file(file);    
   }
-  free(read_buffer);
   return 0;
 }

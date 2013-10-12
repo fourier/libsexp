@@ -4,22 +4,31 @@
 #include "libsexp.h"
 #include "sexptoken.h"
 #include "sexpitem.h"
-         
+
+/* error handler */
 void yyerror (char const *s);
+/* lexer forward declaration */
 int yylex(void);
 
-static void item_print(sexp_item* item, void* data);
-
+/* parse result goes here */
 static sexp_item* g_parsed = 0;
 
+/* increase limit for maximum number of shift states
+ * without reduce - necessary for big files
+ */
 #define YYMAXDEPTH 100000
 #define YYINITDEPTH 10000
 
+extern FILE* yyin;
+
 %}
 
+/* allow debug mode */
 %debug
+/* code to be placed to the header file */
 %code requires {#include "libsexp.h"}
 
+/* all possible data in lexing/parsing process */
 %union {
   atom_token* atom;
   sexp_item*  sexp;
@@ -28,6 +37,9 @@ static sexp_item* g_parsed = 0;
 %token<atom> ATOM
 %token OPENPAREN CLOSEPAREN
 %type <sexp> sexp list list_contents
+/* program nonterminal allows us to handle empty input and
+ * process the parse finish
+ */
 %start program
 
 %%
@@ -48,42 +60,28 @@ list_contents :
 
 void yyerror (char const *s)
 {
-  fprintf (stderr, "%s\n", s);
+  fprintf (stderr, "libsexp parse error: %s\n", s);
 }
 
-static void item_print(sexp_item* item, void* data)
+sexp_item* sexp_parse_file(FILE* input)
 {
-  data = 0;                     /* to reduce compiler warnings */
-  if (item->atom)
-  {
-    atom_token_print(item->atom);
-    printf(" ");
-  }
-  else
-  {
-    printf("Cons (");
-  }
+    sexp_item* result = 0;
+    yyin = input;
+    if (yyparse() == 0) result = g_parsed;
+    yylex_destroy();
+    
+    return result;
 }
 
-#if 0
-int main( int argc, char *argv[] )
-{
-#if 0    
-    extern FILE *yyin;
-     ++argv; --argc;
-     yyin = stdin;/*fopen( argv[0], "r" );*/
-#endif
-     /*yydebug = 1;*/
-     yyparse ();
-     printf("\n");sexp_item_traverse(parsed,item_print,(void*)0);printf("\n");
-}
-#endif
 
-sexp_item* sexp_parse(const char* read_buffer)
+sexp_item* sexp_parse_str(const char* read_buffer)
 {
+    sexp_item* result = 0;
     yy_scan_string(read_buffer);
-    if (yyparse() == 0) return g_parsed;
-    return 0;
+    if (yyparse() == 0) result = g_parsed;
+    yylex_destroy();
+    
+    return result;
 }
 
 

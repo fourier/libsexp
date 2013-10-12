@@ -20,6 +20,8 @@
 #ifndef _LIBSEXP_H_
 #define _LIBSEXP_H_
 
+#include <stdio.h>
+
 /*
  * Type declarations
  */
@@ -113,9 +115,9 @@ int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol);
 void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
 
 /*
- * Parse function. Returns the parsed root item when parsing is complete
+ * Parse functions. Returns the parsed root item when parsing is complete
  */
-sexp_item* sexp_parse(const char* text);
-
+sexp_item* sexp_parse_file(FILE* input);
+sexp_item* sexp_parse_str(const char* read_buffer);
 
 #endif /* _LIBSEXP_H_ */
