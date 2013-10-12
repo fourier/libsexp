@@ -8,6 +8,7 @@
    #include <inttypes.h>
    #include <stdio.h>
 
+   #include "libsexp.h"
    #include "libsexp.tab.h"
    #include "sexptoken.h"
 }
@@ -36,61 +37,35 @@ close-paren          ")"
 %%
 
 {integer-number}        {
-/*    
-    add_to_head(sexp_token_alloc(EATOM,
-                                 atom_token_integer_alloc(yytext,yytext+yyleng)));
-*/
       yylval.atom = atom_token_integer_alloc(yytext,yytext+yyleng);
       return ATOM;  
     }
     
 {floating-point-number} {
-/*
-    add_to_head(sexp_token_alloc(EATOM,
-                                 atom_token_float_alloc(yytext,yytext+yyleng)));
-*/
       yylval.atom = atom_token_float_alloc(yytext,yytext+yyleng);
       return ATOM;
     }
     
 {string}                {
-/*
-    add_to_head(sexp_token_alloc(EATOM,
-                                 atom_token_string_alloc(yytext,yytext+yyleng)));
-*/
       yylval.atom = atom_token_string_alloc(yytext,yytext+yyleng);
       return ATOM;
     }
 
 {symbol-nil}            {
-/*
-    add_to_head(sexp_token_alloc(EATOM,
-                                 atom_token_nil_alloc()));
-*/
       yylval.atom = atom_token_nil_alloc();
       return ATOM;
     }
 
 {symbol}                {
-/*
-    add_to_head(sexp_token_alloc(EATOM,
-                                 atom_token_symbol_alloc(yytext,yytext+yyleng)));
-*/
       yylval.atom = atom_token_symbol_alloc(yytext,yytext+yyleng);
       return ATOM;    
     }
     
 {open-paren}            {
-/*
-    add_to_head(sexp_token_alloc(EOPENPAREN,0));
-*/
       return OPENPAREN;
     }
 
 {close-paren}           {
-/*
-    add_to_head(sexp_token_alloc(ECLOSEPAREN,0));
-*/
       return CLOSEPAREN;
     }
 
@@ -100,14 +75,3 @@ close-paren          ")"
 
 %%
 
-/*    
-sexp_token_cont_item* tokenize(const char* str)
-{
-
-  yy_scan_string(str);
-  while(yylex()>0);
-  return head;
-
-}
-
-*/

@@ -26,7 +26,7 @@ extern FILE* yyin;
 /* allow debug mode */
 %debug
 /* code to be placed to the header file */
-%code requires {#include "libsexp.h"}
+ /*%code requires {#include "libsexp.h"}*/
 
 /* all possible data in lexing/parsing process */
 %union {
