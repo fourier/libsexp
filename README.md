@@ -6,7 +6,7 @@ Copyright (C) 2011-2013 Alexey Veretennikov (alexey dot veretennikov at gmail do
 Description.
 ------------
 Libsexp is a tiny project to create a library for parsing/operating
-with S-Expressions.
+with [S-Expressions](http://en.wikipedia.org/wiki/S-expression).
 It can be used instead of XML parsing libraries when
 someone needs the simple tree-like text format of the input data for the
 application.
