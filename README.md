@@ -138,7 +138,11 @@ if (item->atom->type == EIntegerNumber)
 To extract floating point value from the atom which hase either integer or float
 type, use the following function:
 ```c
-double atom_token_number(atom_token* token);
+double atom_token_fnumber(atom_token* token);
+```
+To extract only integer value:
+```c
+int atom_token_inumber(atom_token* token);
 ```
 Where are also set of functions to help in analysis of the given S-expression:
 ```c

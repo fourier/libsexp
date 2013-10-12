@@ -23,31 +23,32 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
+#include <limits.h>
 
 #include "libsexp.h"
 #include "sexptoken.h"
 
-double atom_token_number(atom_token* token)
+int atom_token_inumber(atom_token* token)
+{
+  int result = INT_MAX;
+  if (token && token->type == EIntegerNumber)
+    result = token->value.int_number;
+  return result;
+}
+
+double atom_token_fnumber(atom_token* token)
 {
   double result = NAN;
-  assert(token);
-  switch(token->type)
+  if (token)
   {
-  case EIntegerNumber:
-    result = token->value.int_number;
-    break;
-  case EFloatNumber:
-    result = token->value.float_number;
-    break;
-  case ESymbol:
-  case EString:
-  case ENil:
-  default:
-    break;
+    if (token->type == EFloatNumber)
+      result = token->value.float_number;
+    else if(token->type == EIntegerNumber)
+      result = (double)token->value.int_number;
   }
   return result;
 }
+
 
 sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute)
 {

@@ -72,8 +72,16 @@ typedef void (*appy_to_item_t) (sexp_item* item, void* data);
 /* Print the information about Atom token in simple format */
 void atom_token_print(atom_token* token);
 
-/* get the number from the atom as a floating-point value */
-double atom_token_number(atom_token* token);
+/* get the number from the atom as a integer value.
+ * Returs INT_MAX if incorrect token type
+ */
+int atom_token_inumber(atom_token* token);
+
+/* get the number from the atom as a floating-point value.
+ * Returns NAN if incorret token type
+ */
+double atom_token_fnumber(atom_token* token);
+
 
 /*
  * Functions operating with sexp_items
