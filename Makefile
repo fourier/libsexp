@@ -45,13 +45,13 @@ all: $(OUTPUT)
 	$(CC) -c $(CFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
 libsexp.tab.o: libsexp.tab.c
-	$(CC) -c -o $@ $<
+	$(CC) -c -ggdb -pg -o $@ $<
 
 libsexp.tab.c: sexp.y
 	$(YACC) --defines=libsexp.tab.h -o libsexp.tab.c -o $@ $<
 
 libsexp.yy.o: libsexp.yy.c libsexp.tab.c
-	$(CC) -c -o $@ $<
+	$(CC) -c -ggdb -pg -o $@ $<
 
 libsexp.yy.c: sexp.l
 	$(LEX) -f -o $@ $<

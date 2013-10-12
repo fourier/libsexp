@@ -12,6 +12,9 @@ static void item_print(sexp_item* item, void* data);
 
 static sexp_item* g_parsed = 0;
 
+#define YYMAXDEPTH 100000
+#define YYINITDEPTH 10000
+
 %}
 
 %debug
