@@ -9,6 +9,7 @@
 void yyerror (char const *s);
 /* lexer forward declaration */
 int yylex(void);
+int yylex_destroy (void );
 
 /* parse result goes here */
 static sexp_item* g_parsed = 0;
@@ -24,7 +25,7 @@ extern FILE* yyin;
 %}
 
 /* allow debug mode */
-%debug
+/* %debug */
 /* code to be placed to the header file */
  /*%code requires {#include "libsexp.h"}*/
 

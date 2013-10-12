@@ -78,6 +78,7 @@
 void yyerror (char const *s);
 /* lexer forward declaration */
 int yylex(void);
+int yylex_destroy (void );
 
 /* parse result goes here */
 static sexp_item* g_parsed = 0;
@@ -93,11 +94,11 @@ extern FILE* yyin;
 
 
 /* Line 268 of yacc.c  */
-#line 97 "libsexp.tab.c"
+#line 98 "libsexp.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 
 /* Enabling verbose error messages.  */
@@ -138,7 +139,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 32 "sexp.y"
+#line 33 "sexp.y"
 
   atom_token* atom;
   sexp_item*  sexp;
@@ -146,7 +147,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 150 "libsexp.tab.c"
+#line 151 "libsexp.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -158,7 +159,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 162 "libsexp.tab.c"
+#line 163 "libsexp.tab.c"
 
 #ifdef short
 # undef short
@@ -446,7 +447,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    47,    47,    48,    50,    51,    53,    54,    56,    57
+       0,    48,    48,    49,    51,    52,    54,    55,    57,    58
 };
 #endif
 
@@ -1373,63 +1374,63 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 47 "sexp.y"
+#line 48 "sexp.y"
     {}
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 48 "sexp.y"
+#line 49 "sexp.y"
     {g_parsed = (yyvsp[(1) - (1)].sexp);}
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 50 "sexp.y"
+#line 51 "sexp.y"
     {(yyval.sexp) = sexp_item_create_atom((yyvsp[(1) - (1)].atom));}
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 51 "sexp.y"
+#line 52 "sexp.y"
     {(yyval.sexp) = (yyvsp[(1) - (1)].sexp);}
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 53 "sexp.y"
+#line 54 "sexp.y"
     {(yyval.sexp) = sexp_item_create_atom(atom_token_nil_alloc()); }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 54 "sexp.y"
+#line 55 "sexp.y"
     { (yyval.sexp) = (yyvsp[(2) - (3)].sexp); }
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 56 "sexp.y"
+#line 57 "sexp.y"
     { (yyval.sexp) = sexp_item_create_cons((yyvsp[(1) - (1)].sexp),sexp_item_create_atom(atom_token_nil_alloc()));}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 57 "sexp.y"
+#line 58 "sexp.y"
     { (yyval.sexp) = sexp_item_create_cons((yyvsp[(1) - (2)].sexp),(yyvsp[(2) - (2)].sexp)); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1433 "libsexp.tab.c"
+#line 1434 "libsexp.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1660,7 +1661,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 59 "sexp.y"
+#line 60 "sexp.y"
 
 
 void yyerror (char const *s)
