@@ -13,6 +13,11 @@
    #include "sexptoken.h"
 }
 
+/* we don't need yywrap since we assume what we will
+ * parse one file at a time
+ */
+%option noyywrap
+
 sign                  "+"|"-"
 decimal-point         "."
 exponent-marker       "e"|"E"
@@ -25,6 +30,7 @@ double-quote          "\""
 escaped-double-quote {escape}{double-quote}
 string               {double-quote}([[:graph:]]|[[:space:]]|{escaped-double-quote})*{double-quote}
 
+/* define nil as case insensitive symbol */
 symbol-nil           (?i:nil)
 symbol-initial       [[:alpha:]]|"!"|"$"|"%"|"&"|"*"|"/"|":"|"<"|"="|">"|"?"|"^"|"_"|"~"
 symbol-constituent   {symbol-initial}|[[:digit:]]|"+"|"-"|"."|"@"

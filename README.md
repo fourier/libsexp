@@ -31,10 +31,9 @@ so use it carefully with this assumption.
 Usage.
 ------
 
-In order to use the library build it and statically link against **libsexp.a** and FLEX library (**-lfl**)
-Typically it shall be enough to use the only header **libsexp.h**.
+In order to use the library build it and statically link against **libsexp.a**. Typically it shall be enough to use the only header **libsexp.h**.
 
-In order to compile one need to have the **GNU Bison** and **FLEX** installed.
+In order to compile one need to have the C compiler only. However if it is necessary to regenerate lexer and parser files(which are part of the source package), the **GNU Bison** and **FLEX** shall also be installed.
 
 Usage example can be found in **main.c**.
 

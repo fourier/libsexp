@@ -23,7 +23,7 @@ YACC = bison
 
 CFLAGS = -ggdb -pg --std=c99 -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations 
 INCLUDES = -I .
-LINKFLAGS = -L. -lsexp -lfl
+LINKFLAGS = -L. -lsexp
 
 OUTPUT_SRC = main.c
 SOURCES := $(wildcard *.c)
@@ -66,7 +66,8 @@ lint:
 	splint *.c
 
 clean :
-	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB) libsexp.yy.c libsexp.tab.*
+	rm $(OBJECTS) $(OUTPUT) $(OUTPUT_LIB)
+#libsexp.yy.c libsexp.tab.*
 
 check-syntax: 
 	gcc -o nul -S ${CHK_SOURCES} 

@@ -63,6 +63,7 @@ void yyerror (char const *s)
   fprintf (stderr, "libsexp parse error: %s\n", s);
 }
 
+
 sexp_item* sexp_parse_file(FILE* input)
 {
     sexp_item* result = 0;
