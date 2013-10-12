@@ -34,6 +34,8 @@ Usage.
 In order to use the library build it and statically link against **libsexp.a** and FLEX library (**-lfl**)
 Typically it shall be enough to use the only header **libsexp.h**.
 
+In order to compile one need to have the **GNU Bison** and **FLEX** installed.
+
 Usage example can be found in **main.c**.
 
 Typical usage is:
