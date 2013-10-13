@@ -84,15 +84,13 @@ Supported data.
 
 The data stored in sexp_item structure is either atom or list. The structure is forward-declared in ```libsexp.h``` and declared in ```sexpitem.h```:
 ```c
-typedef struct sexp_item_tag
-{
-  atom_token* atom;             /* if not empty - ATOM */
-  /* otherwise CONS */
-  struct sexp_item_tag* car;
-  struct sexp_item_tag* cdr;
-} sexp_item;
+typedef struct sexp_item;
 ```
-List is a pair of pointers: to the first element (CAR) and to the list of rest
+In order to determine if sexp is a list (or particularly cons-cell), one can use the function
+```c
+int sexp_item_is_cons(sexp_item* item);
+```
+List is a pair of pointers(so called CONS-cell): to the first element (CAR) and to the list of rest
 elements (CDR). In order to access them there are 2 convenient functions:
 ```c
 sexp_item* sexp_item_car(sexp_item* item);
@@ -121,8 +119,29 @@ while(!sexp_item_is_nil(next)
   next = sexp_item_cdr(next);
 }
 ```
+In order to determine if item is of type atom, the following function provided:
+```c
+int sexp_item_is_atom(sexp_item* item);
+```
 ATOM type of the SEXP can be of the following 5 types:
 integer number, float number, string, symbol(and special type NIL).
+The type of atom can be found by using the following functions:
+```c
+/* return non-zero if item is atom of type nil */
+int sexp_item_is_nil(sexp_item* item);
+
+/* return non-zero if item is atom of type integer */
+int sexp_item_is_integer(sexp_item* item);
+
+/* return non-zero if item is atom of type float */
+int sexp_item_is_float(sexp_item* item);
+
+/* return non-zero if item is atom of type string */
+int sexp_item_is_string(sexp_item* item);
+
+/* return non-zero if item is atom of type symbol */
+int sexp_item_is_symbol(sexp_item* item);
+```
 String is the double-quoted array of characters while symbol is the unquoted array
 of characters. Currently only ASCII-characters supported (for simplicity)
 Symbols are always stored in the upper-case.
@@ -132,18 +151,24 @@ for example for integer numbers:
 ```c
 extern sexp_item* item;
 int i;
-if (item->atom->type == EIntegerNumber)
-  i = item->atom->value.int_number;
+if (sexp_item_is_integer(item))
+  i = sexp_item_inumber(item);
 ```
 To extract floating point value from the atom which hase either integer or float
 type, use the following function:
 ```c
-double atom_token_fnumber(atom_token* token);
+double sexp_item_fnumber(sexp_item* item);
 ```
 To extract only integer value:
 ```c
-int atom_token_inumber(atom_token* token);
+int sexp_item_inumber(sexp_item* item);
 ```
+For strings and symbols:
+```c
+const char* sexp_item_string(sexp_item* item);
+const char* sexp_item_symbol(sexp_item* item);
+```
+
 Where are also set of functions to help in analysis of the given S-expression:
 ```c
 int sexp_item_is_symbol_like(sexp_item* item, const char* symbol);
