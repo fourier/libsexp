@@ -55,7 +55,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 33 "sexp.y"
+#line 32 "sexp.y"
 
   atom_token* atom;
   sexp_item*  sexp;

@@ -26,20 +26,82 @@
 #include <limits.h>
 
 #include "libsexp.h"
+#include "sexpitem.h"
 #include "sexptoken.h"
 
-int atom_token_inumber(atom_token* token)
+int sexp_item_is_atom(sexp_item* item)
+{
+  return item && item->atom;
+}
+
+
+int sexp_item_is_cons(sexp_item* item)
+{
+  return item && item->car;
+}
+
+
+int sexp_item_is_integer(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          item->atom->type == EIntegerNumber);
+}
+
+
+int sexp_item_is_float(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          item->atom->type == EFloatNumber);
+}
+
+
+int sexp_item_is_string(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          item->atom->type == EString);
+}
+
+
+int sexp_item_is_symbol(sexp_item* item)
+{
+    return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          item->atom->type == ESymbol);
+}
+
+
+void sexp_item_print(sexp_item* item)
+{
+  if (item && item->atom)
+    atom_token_print(item->atom);
+}
+
+
+int sexp_item_inumber(sexp_item* item)
 {
   int result = INT_MAX;
-  if (token && token->type == EIntegerNumber)
-    result = token->value.int_number;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      item->atom->type == EIntegerNumber)
+    result = item->atom->value.int_number;
   return result;
 }
 
-double atom_token_fnumber(atom_token* token)
+double sexp_item_fnumber(sexp_item* item)
 {
   double result = NAN;
-  if (token)
+  atom_token* token = 0;
+  if (item &&
+      sexp_item_is_atom(item)
+      && (token = item->atom))
   {
     if (token->type == EFloatNumber)
       result = token->value.float_number;
@@ -47,6 +109,28 @@ double atom_token_fnumber(atom_token* token)
       result = (double)token->value.int_number;
   }
   return result;
+}
+
+const char* sexp_item_string(sexp_item* item)
+{
+  const char* result = 0;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      item->atom->type == EString)
+    result = item->atom->value.string;
+  return result;
+}
+
+const char* sexp_item_symbol(sexp_item* item)
+{
+  const char* result = 0;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      item->atom->type == ESymbol)
+    result = item->atom->value.symbol;
+  return result;  
 }
 
 
@@ -90,12 +174,12 @@ int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol)
   if (item)
   {
     car = sexp_item_car(item);
-    result = sexp_item_is_symbol(car,symbol);
+    result = sexp_item_is_symbol_like(car,symbol);
   }
   return result;
 }
 
-int sexp_item_is_symbol(sexp_item* item, const char* symbol)
+int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
 {
   int result = 0;
   char* p;
@@ -113,36 +197,3 @@ int sexp_item_is_symbol(sexp_item* item, const char* symbol)
   }
   return result;
 }
-
-#if 0
-extern sexp_token_cont_item* tokenize(const char* str);
-
-sexp_item* sexp_parse(const char* text)
-{
-  const char* p = text;
-
-  /* list of tokens */
-  sexp_token_cont_item *head = 0;
-  sexp_token* token = 0;
-
-  /* parser result */
-  sexp_item* sexp;
-
-  /* 1. Lexer */
-#if 0
-  token = read_sexp_token(&p);  
-  if (token)
-    head = sexp_token_cont_item_alloc(token);
-  while ( (token = read_sexp_token(&p)))
-    sexp_token_list_add(head,token);
-#endif
-  head = tokenize(text);
-  /* 2. Parser */
-  sexp = parse_sexp_token_list(head,0);
-  if (!sexp)
-    fprintf(stderr,"Unable to parse input!\n");
-  /* 3. Free the allocated memory  */
-  head = sexp_token_cont_list_free(head);
-  return sexp;
-}
-#endif

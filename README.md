@@ -82,7 +82,7 @@ sexp_item_free(item);
 Supported data.
 ---------------
 
-The data stored in sexp_item structure is either atom or list:
+The data stored in sexp_item structure is either atom or list. The structure is forward-declared in ```libsexp.h``` and declared in ```sexpitem.h```:
 ```c
 typedef struct sexp_item_tag
 {
@@ -146,7 +146,7 @@ int atom_token_inumber(atom_token* token);
 ```
 Where are also set of functions to help in analysis of the given S-expression:
 ```c
-int sexp_item_is_symbol(sexp_item* item, const char* symbol);
+int sexp_item_is_symbol_like(sexp_item* item, const char* symbol);
 ```
 This function returns not-zero value if iten is of type symbol (and symbol
 argument is 0), and if symbol argument points to some string(no matter upper-cased
@@ -155,7 +155,7 @@ sexp_item* item is of type Symbol 'HELLO', the following call will return non-ze
 value:
 
 ```c
-sexp_item_is_symbol(item,"hello")
+sexp_item_is_symbol_like(item,"hello")
 ```
 
 ```c

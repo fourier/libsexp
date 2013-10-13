@@ -30,9 +30,9 @@ const int block_size = 16384;
 static void item_print(sexp_item* item, void* data)
 {
   (void)data;                     /* to reduce compiler warnings */
-  if (item->atom)
+  if (sexp_item_is_atom(item))
   {
-    atom_token_print(item->atom);
+    sexp_item_print(item);
     printf(" ");
   }
   else

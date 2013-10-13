@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 
-#include "libsexp.h"
 #include "sexptoken.h"
 #include "sexpitem.h"
 

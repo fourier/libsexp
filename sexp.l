@@ -8,9 +8,8 @@
    #include <inttypes.h>
    #include <stdio.h>
 
-   #include "libsexp.h"
-   #include "libsexp.tab.h"
    #include "sexptoken.h"
+   #include "libsexp.tab.h"
 }
 
 /* we don't need yywrap since we assume what we will

@@ -23,6 +23,36 @@
 
 #include "libsexp.h"
 
+/*
+ * Type declarations
+ */
+
+/*
+ * Enum specifying atom-level token types as
+ * integer, float, string, symbol
+ */
+typedef enum
+{
+  EIntegerNumber,
+  EFloatNumber,
+  EString,
+  ESymbol,
+  ENil
+} AtomTokenType;
+
+/* Structure holding atoms */
+typedef struct
+{
+  AtomTokenType type;
+  union Value
+  {
+    int int_number;
+    double float_number;
+    char* string;
+    char* symbol;
+  } value;
+} atom_token;
+
 
 /*
  * Function declarations
@@ -45,5 +75,7 @@ atom_token* atom_token_nil_alloc();
 /* Free allocated memory for Atom token */
 atom_token* atom_token_free(atom_token* token);
 
+/* Pretty-print token value */
+void atom_token_print(atom_token* token);
 
 #endif /* _SEXPTOKENS_H_ */

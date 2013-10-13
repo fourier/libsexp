@@ -26,73 +26,69 @@
  * Type declarations
  */
 
-/*
- * Enum specifying atom-level token types as
- * integer, float, string, symbol
- */
-typedef enum
-{
-  EIntegerNumber,
-  EFloatNumber,
-  EString,
-  ESymbol,
-  ENil
-} AtomTokenType;
-
-/* Structure holding atoms */
-typedef struct
-{
-  AtomTokenType type;
-  union Value
-  {
-    int int_number;
-    double float_number;
-    char* string;
-    char* symbol;
-  } value;
-} atom_token;
-
-/* struct representing SEXP item: ATOM or CONS */
+/* forward declaration */
 typedef struct sexp_item sexp_item;
-struct sexp_item
-{
-  atom_token* atom;             /* if not empty - ATOM */
-  /* otherwise CONS */
-  struct sexp_item* car;
-  struct sexp_item* cdr;
-};
 
+/* visitor function used in traverse through Sexp */
 typedef void (*appy_to_item_t) (sexp_item* item, void* data);
-
-/*
- * Functions operating on atoms
- * Implemented in sexptoken.c
- */
-
-/* Print the information about Atom token in simple format */
-void atom_token_print(atom_token* token);
-
-/* get the number from the atom as a integer value.
- * Returs INT_MAX if incorrect token type
- */
-int atom_token_inumber(atom_token* token);
-
-/* get the number from the atom as a floating-point value.
- * Returns NAN if incorret token type
- */
-double atom_token_fnumber(atom_token* token);
 
 
 /*
  * Functions operating with sexp_items
- * Implemented in sexpitem.c
+ * Implemented in sexpitem.c and libsexp.c
  */
+
+/* return non-zero if item is cons cell */
+int sexp_item_is_cons(sexp_item* item);
+
+/* return non-zero if item is atom */
+int sexp_item_is_atom(sexp_item* item);
+
+/* return non-zero if item is atom of type nil */
+int sexp_item_is_nil(sexp_item* item);
+
+/* return non-zero if item is atom of type integer */
+int sexp_item_is_integer(sexp_item* item);
+
+/* return non-zero if item is atom of type float */
+int sexp_item_is_float(sexp_item* item);
+
+/* return non-zero if item is atom of type string */
+int sexp_item_is_string(sexp_item* item);
+
+/* return non-zero if item is atom of type symbol */
+int sexp_item_is_symbol(sexp_item* item);
+
+
+/* Print the information about Atom sexp in simple format */
+void sexp_item_print(sexp_item* item);
+
+/* get the number from the atom as a integer value.
+ * Returs INT_MAX if incorrect token type
+ */
+int sexp_item_inumber(sexp_item* item);
+
+/* get the number from the atom as a floating-point value.
+ * Returns NAN if incorret token type
+ */
+double sexp_item_fnumber(sexp_item* item);
+
+/* get the string value if item is an atom of type string.
+ * Returns 0 if incorrect token type
+ */
+const char* sexp_item_string(sexp_item* item);
+
+/* get the string value if item is an atom of type string.
+ * Returns 0 if incorrect token type
+ */
+const char* sexp_item_symbol(sexp_item* item);
+
+
 
 sexp_item* sexp_item_free(sexp_item* item);
 sexp_item* sexp_item_car(sexp_item* item);
 sexp_item* sexp_item_cdr(sexp_item* item);
-/* return non-zero if item is atom of type nil */
-int sexp_item_is_nil(sexp_item* item);
+
 /* calculates the length of the list item. -1 if item is not of type list */
 int sexp_item_length(sexp_item* item);
 /* return i-th element of the list item, 0 if not found */
@@ -112,7 +108,7 @@ sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute);
  * is symbol with value from the 2nd argument(regardless of the character
  * case)
  */
-int sexp_item_is_symbol(sexp_item* item, const char* symbol);
+int sexp_item_is_symbol_like(sexp_item* item, const char* symbol);
 
 /*
  * Check if item is a list starting with symbol. If symbol != 0,

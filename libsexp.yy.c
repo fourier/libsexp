@@ -5,13 +5,12 @@
    #include <inttypes.h>
    #include <stdio.h>
 
-   #include "libsexp.h"
-   #include "libsexp.tab.h"
    #include "sexptoken.h"
+   #include "libsexp.tab.h"
 
 
 
-#line 15 "libsexp.yy.c"
+#line 14 "libsexp.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1143,7 +1142,7 @@ char *yytext;
  * parse one file at a time
  */
 /* define nil as case insensitive symbol */
-#line 1147 "libsexp.yy.c"
+#line 1146 "libsexp.yy.c"
 
 #define INITIAL 0
 
@@ -1314,10 +1313,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 43 "sexp.l"
+#line 42 "sexp.l"
 
 
-#line 1321 "libsexp.yy.c"
+#line 1320 "libsexp.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1390,7 +1389,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 45 "sexp.l"
+#line 44 "sexp.l"
 {
       yylval.atom = atom_token_integer_alloc(yytext,yytext+yyleng);
       return ATOM;  
@@ -1398,7 +1397,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 50 "sexp.l"
+#line 49 "sexp.l"
 {
       yylval.atom = atom_token_float_alloc(yytext,yytext+yyleng);
       return ATOM;
@@ -1407,7 +1406,7 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 55 "sexp.l"
+#line 54 "sexp.l"
 {
       yylval.atom = atom_token_string_alloc(yytext,yytext+yyleng);
       return ATOM;
@@ -1415,7 +1414,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 60 "sexp.l"
+#line 59 "sexp.l"
 {
       yylval.atom = atom_token_nil_alloc();
       return ATOM;
@@ -1423,7 +1422,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 65 "sexp.l"
+#line 64 "sexp.l"
 {
       yylval.atom = atom_token_symbol_alloc(yytext,yytext+yyleng);
       return ATOM;    
@@ -1431,14 +1430,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 70 "sexp.l"
+#line 69 "sexp.l"
 {
       return OPENPAREN;
     }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 74 "sexp.l"
+#line 73 "sexp.l"
 {
       return CLOSEPAREN;
     }
@@ -1446,21 +1445,21 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 78 "sexp.l"
+#line 77 "sexp.l"
 {}
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 80 "sexp.l"
+#line 79 "sexp.l"
 {}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 82 "sexp.l"
+#line 81 "sexp.l"
 ECHO;
 	YY_BREAK
-#line 1464 "libsexp.yy.c"
+#line 1463 "libsexp.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2453,7 +2452,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 82 "sexp.l"
+#line 81 "sexp.l"
 
 
 
