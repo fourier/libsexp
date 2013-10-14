@@ -9,6 +9,7 @@ void yyerror (char const *s);
 /* lexer forward declaration */
 int yylex(void);
 int yylex_destroy (void );
+void* yy_scan_string (const char *yy_str);
 
 /* parse result goes here */
 static sexp_item* g_parsed = 0;
