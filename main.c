@@ -92,6 +92,7 @@ static void parse_file(FILE* file)
         printf("\n");    
         sexp_item_traverse(sexp,item_print,(void*)0);
         printf("\n");
+        /* printf("size: %d\n", sexp_item_size(sexp)); */
         sexp_item_free(sexp);
       }
 #if READ_FILE_TO_MEMORY      

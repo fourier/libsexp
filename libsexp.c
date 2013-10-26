@@ -197,3 +197,19 @@ int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
   }
   return result;
 }
+
+static void sexp_calc_size(sexp_item* item, void* data)
+{
+  unsigned int* size = (unsigned int*)data;
+  (*size) += sizeof(sexp_item);
+  if (sexp_item_is_atom(item))
+    (*size) += atom_token_size(item->atom);
+}
+
+
+unsigned int sexp_item_size(sexp_item* item)
+{
+  unsigned int size = 0;
+  sexp_item_traverse(item, sexp_calc_size, &size);
+  return size;
+}

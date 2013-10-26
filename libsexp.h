@@ -120,6 +120,12 @@ int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol);
 void sexp_item_traverse(sexp_item* item,appy_to_item_t function, void* data);
 
 /*
+ * calculate the size of the item in dynamic memory, including
+ * sizes of all elements if item is a list
+ */
+unsigned int sexp_item_size(sexp_item* item);
+
+/*
  * Main parse function - parses from file.
  * Returns the parsed root item when parsing is complete
  * or zero pointer if parsing failed

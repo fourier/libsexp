@@ -108,5 +108,3 @@ const char* sexpst_get(int string_id)
     g_sexpst.strings[string_id] : 0;
 }
 
-
-

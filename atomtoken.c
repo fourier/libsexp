@@ -181,45 +181,71 @@ atom_token* atom_token_nil_alloc()
 
 int atom_token_is_integer(atom_token* token)
 {
+  assert(token);
   return token->type == EIntegerNumber;
 }
 
 int atom_token_is_float(atom_token* token)
 {
+  assert(token);
   return token->type == EFloatNumber;
 }
 
 int atom_token_is_string(atom_token* token)
 {
+  assert(token);
   return token->type == EString;
 }
 
 int atom_token_is_symbol(atom_token* token)
 {
+  assert(token);
   return token->type == ESymbol;
 }
 
 int atom_token_is_nil(atom_token* token)
 {
+  assert(token);
   return token->type == ENil;
 }
 
 int atom_token_integer(atom_token* token)
 {
+  assert(token);
   return token->value.int_number;
 }
 
 double atom_token_float(atom_token* token)
 {
+  assert(token);
   return token->value.float_number;
 }
 
 const char* atom_token_string(atom_token* token)
 {
+  assert(token);
   return sexpst_get(token->value.string_id);
 }
 
 const char* atom_token_symbol(atom_token* token)
 {
+  assert(token);
   return sexpst_get(token->value.string_id);
 }
+
+
+unsigned int atom_token_size(atom_token* token)
+{
+  (void)token;
+  return sizeof(atom_token);
+}
+
+
+
+
+
+
+
+
+
+
