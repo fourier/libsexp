@@ -26,6 +26,33 @@
 
 #include "sexptoken.h"
 
+/*
+ * Enum specifying atom-level token types as
+ * integer, float, string, symbol
+ */
+typedef enum
+{
+  EIntegerNumber,
+  EFloatNumber,
+  EString,
+  ESymbol,
+  ENil
+} AtomTokenType;
+
+/* Structure holding atoms */
+struct atom_token
+{
+  AtomTokenType type;
+  union Value
+  {
+    int int_number;
+    double float_number;
+    char* string;
+    char* symbol;
+  } value;
+};
+
+
 /* Print the information about Atom token in simple format */
 void atom_token_print(atom_token* token)
 {
@@ -53,8 +80,8 @@ void atom_token_print(atom_token* token)
   }
 }
 
-
-atom_token* atom_token_alloc(AtomTokenType type)
+/* Allocate memory for Atom token and empty necessary fields */
+static atom_token* atom_token_alloc(AtomTokenType type)
 {
   atom_token* token = calloc(1, sizeof(atom_token));
   if (token)
@@ -152,4 +179,49 @@ atom_token* atom_token_nil_alloc()
 {
   atom_token* token = atom_token_alloc(ENil);
   return token;
+}
+
+int atom_token_is_integer(atom_token* token)
+{
+  return token->type == EIntegerNumber;
+}
+
+int atom_token_is_float(atom_token* token)
+{
+  return token->type == EFloatNumber;
+}
+
+int atom_token_is_string(atom_token* token)
+{
+  return token->type == EString;
+}
+
+int atom_token_is_symbol(atom_token* token)
+{
+  return token->type == ESymbol;
+}
+
+int atom_token_is_nil(atom_token* token)
+{
+  return token->type == ENil;
+}
+
+int atom_token_integer(atom_token* token)
+{
+  return token->value.int_number;
+}
+
+double atom_token_float(atom_token* token)
+{
+  return token->value.float_number;
+}
+
+char* atom_token_string(atom_token* token)
+{
+  return token->value.string;
+}
+
+char* atom_token_symbol(atom_token* token)
+{
+  return token->value.symbol;
 }

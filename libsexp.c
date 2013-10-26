@@ -46,7 +46,7 @@ int sexp_item_is_integer(sexp_item* item)
   return (item &&
           sexp_item_is_atom(item) &&
           item->atom &&
-          item->atom->type == EIntegerNumber);
+          atom_token_is_integer(item->atom));
 }
 
 
@@ -55,7 +55,7 @@ int sexp_item_is_float(sexp_item* item)
   return (item &&
           sexp_item_is_atom(item) &&
           item->atom &&
-          item->atom->type == EFloatNumber);
+          atom_token_is_float(item->atom));
 }
 
 
@@ -64,7 +64,7 @@ int sexp_item_is_string(sexp_item* item)
   return (item &&
           sexp_item_is_atom(item) &&
           item->atom &&
-          item->atom->type == EString);
+          atom_token_is_string(item->atom));
 }
 
 
@@ -73,7 +73,7 @@ int sexp_item_is_symbol(sexp_item* item)
     return (item &&
           sexp_item_is_atom(item) &&
           item->atom &&
-          item->atom->type == ESymbol);
+          atom_token_is_symbol(item->atom));
 }
 
 
@@ -90,8 +90,8 @@ int sexp_item_inumber(sexp_item* item)
   if (item &&
       sexp_item_is_atom(item) &&
       item->atom &&
-      item->atom->type == EIntegerNumber)
-    result = item->atom->value.int_number;
+      atom_token_is_integer(item->atom))
+    result = atom_token_integer(item->atom);
   return result;
 }
 
@@ -103,10 +103,10 @@ double sexp_item_fnumber(sexp_item* item)
       sexp_item_is_atom(item)
       && (token = item->atom))
   {
-    if (token->type == EFloatNumber)
-      result = token->value.float_number;
-    else if(token->type == EIntegerNumber)
-      result = (double)token->value.int_number;
+    if (atom_token_is_float(token))
+      result = atom_token_float(token);
+    else if(atom_token_is_integer(token))
+      result = (double)atom_token_integer(token);
   }
   return result;
 }
@@ -117,8 +117,8 @@ const char* sexp_item_string(sexp_item* item)
   if (item &&
       sexp_item_is_atom(item) &&
       item->atom &&
-      item->atom->type == EString)
-    result = item->atom->value.string;
+      atom_token_is_string(item->atom))
+    result = atom_token_string(item->atom);
   return result;
 }
 
@@ -128,8 +128,8 @@ const char* sexp_item_symbol(sexp_item* item)
   if (item &&
       sexp_item_is_atom(item) &&
       item->atom &&
-      item->atom->type == ESymbol)
-    result = item->atom->value.symbol;
+      atom_token_is_symbol(item->atom))
+    result = atom_token_symbol(item->atom);
   return result;  
 }
 
@@ -152,8 +152,8 @@ sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute)
     while(next && !sexp_item_is_nil(next))
     {
       car = sexp_item_car(next);
-      if (car->atom && car->atom->type == ESymbol &&
-          !strcmp(car->atom->value.symbol,attribute_name))
+      if (car->atom && atom_token_is_symbol(car->atom) &&
+          !strcmp(atom_token_symbol(car->atom),attribute_name))
       {
         result = sexp_item_car(sexp_item_cdr(next));
         break;
@@ -183,12 +183,12 @@ int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
 {
   int result = 0;
   char* p;
-  if (item && item->atom && item->atom->type == ESymbol)
+  if (item && item->atom && atom_token_is_symbol(item->atom))
   {
     result = 1;
     if (symbol)
     {
-      p = item->atom->value.symbol;
+      p = atom_token_symbol(item->atom);
       while (*p || *symbol)
         if (toupper(*symbol++) != *p++)
           return 0;

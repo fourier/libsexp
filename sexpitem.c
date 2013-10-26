@@ -140,7 +140,7 @@ int sexp_item_is_nil(sexp_item* item)
 {
   int result = 0;
   assert(item);
-  result = item->atom && item->atom->type == ENil;
+  result = item->atom && atom_token_is_nil(item->atom);
   return result;
 }
 

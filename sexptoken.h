@@ -27,43 +27,14 @@
  * Type declarations
  */
 
-/*
- * Enum specifying atom-level token types as
- * integer, float, string, symbol
- */
-typedef enum
-{
-  EIntegerNumber,
-  EFloatNumber,
-  EString,
-  ESymbol,
-  ENil
-} AtomTokenType;
-
-/* Structure holding atoms */
-typedef struct
-{
-  AtomTokenType type;
-  union Value
-  {
-    int int_number;
-    double float_number;
-    char* string;
-    char* symbol;
-  } value;
-} atom_token;
-
+#ifndef ATOM_TOKEN_STRUCT
+#define ATOM_TOKEN_STRUCT
+typedef struct atom_token atom_token;
+#endif /* ATOM_TOKEN_STRUCT */
 
 /*
  * Function declarations
  */
-
-/*
- * Functions operating with atom_token structures
- */
-
-/* Allocate memory for Atom token and empty necessary fields */
-atom_token* atom_token_alloc(AtomTokenType type);
 
 /* Constructors: allocate memory and create Atom of specified type */
 atom_token* atom_token_integer_alloc(const char* begin, const char* end);
@@ -74,6 +45,19 @@ atom_token* atom_token_nil_alloc();
 
 /* Free allocated memory for Atom token */
 atom_token* atom_token_free(atom_token* token);
+
+/* getters of the atom_token properties */
+int atom_token_is_integer(atom_token* token);
+int atom_token_is_float(atom_token* token);
+int atom_token_is_string(atom_token* token);
+int atom_token_is_symbol(atom_token* token);
+int atom_token_is_nil(atom_token* token);
+
+int atom_token_integer(atom_token* token);
+double atom_token_float(atom_token* token);
+char* atom_token_string(atom_token* token);
+char* atom_token_symbol(atom_token* token);
+
 
 /* Pretty-print token value */
 void atom_token_print(atom_token* token);
