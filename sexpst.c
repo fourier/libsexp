@@ -33,7 +33,7 @@ struct sexpst_internal
   int nexp_index;
 };
 
-struct sexpst_internal g_sexpst = {0};
+struct sexpst_internal g_sexpst = {0,0,-1};
 
 static void sexpst_fini();
 
