@@ -55,8 +55,8 @@ int atom_token_is_nil(atom_token* token);
 
 int atom_token_integer(atom_token* token);
 double atom_token_float(atom_token* token);
-char* atom_token_string(atom_token* token);
-char* atom_token_symbol(atom_token* token);
+const char* atom_token_string(atom_token* token);
+const char* atom_token_symbol(atom_token* token);
 
 
 /* Pretty-print token value */

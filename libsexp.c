@@ -182,7 +182,7 @@ int sexp_item_starts_with_symbol(sexp_item* item, const char* symbol)
 int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
 {
   int result = 0;
-  char* p;
+  const char* p;
   if (item && item->atom && atom_token_is_symbol(item->atom))
   {
     result = 1;

@@ -25,6 +25,7 @@
 #include <ctype.h>
 
 #include "atomtoken.h"
+#include "sexpst.h"
 
 /*
  * Enum specifying atom-level token types as
@@ -47,8 +48,7 @@ struct atom_token
   {
     int int_number;
     double float_number;
-    char* string;
-    char* symbol;
+    int string_id;
   } value;
 };
 
@@ -67,10 +67,10 @@ void atom_token_print(atom_token* token)
       printf("%f",token->value.float_number);
       break;
     case EString:
-      printf("%s",token->value.string);
+      printf("\"%s\"",sexpst_get(token->value.string_id));
       break;
     case ESymbol:
-      printf("%s",token->value.symbol);
+      printf("%s",sexpst_get(token->value.string_id));
       break;
     case ENil:
       printf("NIL");
@@ -96,11 +96,7 @@ atom_token* atom_token_free(atom_token* token)
     switch (token->type)
     {
     case EString:
-      free(token->value.string);
-      break;
     case ESymbol:
-      free(token->value.symbol);
-      break;
     case EIntegerNumber:
     case EFloatNumber:
     case ENil:
@@ -157,9 +153,10 @@ atom_token* atom_token_string_alloc(const char* begin, const char* end)
 {
   atom_token* token = atom_token_alloc(EString);
   int size = end - begin + 1;
-  token->value.string = calloc(size, 1);
+  char* string  = calloc(size, 1);
   /* memcpy(token->value.string,begin,size - 1); */
-  unescaped_copy_string(token->value.string,begin,size-1);
+  unescaped_copy_string(string,begin,size-1);
+  token->value.string_id = sexpst_add(string);
   return token;
 }
 
@@ -168,10 +165,11 @@ atom_token* atom_token_symbol_alloc(const char* begin, const char* end)
   atom_token* token = atom_token_alloc(ESymbol);
   char* ptr;
   int size = end - begin + 1;
-  token->value.string = calloc(size, 1);
-  ptr = token->value.string;
+  char* string = calloc(size, 1);
+  ptr = string;
   while(begin != end)
     *ptr++ = toupper(*begin++);
+  token->value.string_id = sexpst_add(string);
   return token;
 }
 
@@ -216,12 +214,12 @@ double atom_token_float(atom_token* token)
   return token->value.float_number;
 }
 
-char* atom_token_string(atom_token* token)
+const char* atom_token_string(atom_token* token)
 {
-  return token->value.string;
+  return sexpst_get(token->value.string_id);
 }
 
-char* atom_token_symbol(atom_token* token)
+const char* atom_token_symbol(atom_token* token)
 {
-  return token->value.symbol;
+  return sexpst_get(token->value.string_id);
 }

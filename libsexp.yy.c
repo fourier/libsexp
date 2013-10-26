@@ -389,7 +389,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
         3,    4,    4,    4,    4,    4,    4,    4,    4,    5,
         5,    5,    5,    5,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-        4,    4,    5,    6,    7,    4,    6,    6,    6,    4,
+        4,    4,    5,    6,    7,    4,    6,    6,    6,    6,
         8,    9,    6,   10,    4,   10,   11,    6,   12,   12,
        12,   12,   12,   12,   12,   12,   12,   12,    6,   13,
         6,    6,    6,    6,    4,    6,    6,    6,    6,    6,
@@ -406,7 +406,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
         3,    4,    4,    4,    4,    4,    4,    4,    4,    5,
         5,    5,    5,    5,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-        4,    4,    5,    6,    7,    4,    6,    6,    6,    4,
+        4,    4,    5,    6,    7,    4,    6,    6,    6,    6,
 
         8,    9,    6,   10,    4,   10,   11,    6,   12,   12,
        12,   12,   12,   12,   12,   12,   12,   12,    6,   13,
@@ -476,7 +476,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
        -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,
 
        -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,   -6,
-       -6,   -6,   -6,   15,   -6,   -6,   15,   15,   15,   -6,
+       -6,   -6,   -6,   15,   -6,   -6,   15,   15,   15,   15,
        -6,   -6,   15,   15,   -6,   15,   15,   15,   15,   15,
        15,   15,   15,   15,   15,   15,   15,   15,   15,   -6,
        15,   15,   15,   15,   15,   15,   15,   15,   15,   15,
@@ -614,7 +614,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
         3,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,
       -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,
       -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,  -14,
-      -14,  -14,  -14,   15,  -14,  -14,   15,   15,   15,  -14,
+      -14,  -14,  -14,   15,  -14,  -14,   15,   15,   15,   15,
       -14,  -14,   15,   15,  -14,   15,   15,   15,   15,   15,
        15,   15,   15,   15,   15,   15,   15,   15,   15,  -14,
        15,   15,   15,   15,   15,   15,   15,   15,   15,   15,
@@ -631,7 +631,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
         3,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,
       -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,
       -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,  -15,
-      -15,  -15,  -15,   15,  -15,  -15,   15,   15,   15,  -15,
+      -15,  -15,  -15,   15,  -15,  -15,   15,   15,   15,   15,
       -15,  -15,   15,   15,  -15,   15,   15,   15,   15,   15,
 
        15,   15,   15,   15,   15,   15,   15,   15,   15,  -15,
@@ -663,20 +663,20 @@ static yyconst flex_int16_t yy_nxt[][128] =
     },
 
     {
-        3,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,   16,
-       16,   16,   16,   16,  -17,  -17,  -17,  -17,  -17,  -17,
+        3,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
       -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
-      -17,  -17,   16,   16,   17,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
 
-       16,   16,   18,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       16,   16,   16,   16,   16,   16,   16,  -17
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17,
+      -17,  -17,  -17,  -17,  -17,  -17,  -17,  -17
     },
 
     {
@@ -874,7 +874,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
       -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,
       -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,  -29,
 
-      -29,  -29,  -29,   15,  -29,  -29,   15,   15,   15,  -29,
+      -29,  -29,  -29,   15,  -29,  -29,   15,   15,   15,   15,
       -29,  -29,   15,   15,  -29,   15,   15,   15,   15,   15,
        15,   15,   15,   15,   15,   15,   15,   15,   15,  -29,
        15,   15,   15,   15,   15,   15,   15,   15,   15,   15,
@@ -1029,7 +1029,7 @@ static yyconst flex_int16_t yy_nxt[][128] =
         3,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,
       -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,
       -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,  -38,
-      -38,  -38,  -38,   15,  -38,  -38,   15,   15,   15,  -38,
+      -38,  -38,  -38,   15,  -38,  -38,   15,   15,   15,   15,
       -38,  -38,   15,   15,  -38,   15,   15,   15,   15,   15,
        15,   15,   15,   15,   15,   15,   15,   15,   15,  -38,
 
@@ -1141,8 +1141,10 @@ char *yytext;
 /* we don't need yywrap since we assume what we will
  * parse one file at a time
  */
+/* numbers */
+/* strings */
 /* define nil as case insensitive symbol */
-#line 1146 "libsexp.yy.c"
+#line 1148 "libsexp.yy.c"
 
 #define INITIAL 0
 
@@ -1313,10 +1315,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 42 "sexp.l"
+#line 45 "sexp.l"
 
 
-#line 1320 "libsexp.yy.c"
+#line 1322 "libsexp.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -1389,7 +1391,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 44 "sexp.l"
+#line 47 "sexp.l"
 {
       yylval.atom = atom_token_integer_alloc(yytext,yytext+yyleng);
       return ATOM;  
@@ -1397,7 +1399,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 49 "sexp.l"
+#line 52 "sexp.l"
 {
       yylval.atom = atom_token_float_alloc(yytext,yytext+yyleng);
       return ATOM;
@@ -1406,15 +1408,15 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 54 "sexp.l"
+#line 57 "sexp.l"
 {
-      yylval.atom = atom_token_string_alloc(yytext,yytext+yyleng);
+      yylval.atom = atom_token_string_alloc(yytext+1,yytext+yyleng-1);
       return ATOM;
     }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 59 "sexp.l"
+#line 62 "sexp.l"
 {
       yylval.atom = atom_token_nil_alloc();
       return ATOM;
@@ -1422,7 +1424,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 64 "sexp.l"
+#line 67 "sexp.l"
 {
       yylval.atom = atom_token_symbol_alloc(yytext,yytext+yyleng);
       return ATOM;    
@@ -1430,14 +1432,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 69 "sexp.l"
+#line 72 "sexp.l"
 {
       return OPENPAREN;
     }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 73 "sexp.l"
+#line 76 "sexp.l"
 {
       return CLOSEPAREN;
     }
@@ -1445,21 +1447,21 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 77 "sexp.l"
+#line 80 "sexp.l"
 {}
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 79 "sexp.l"
+#line 82 "sexp.l"
 {}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 81 "sexp.l"
+#line 84 "sexp.l"
 ECHO;
 	YY_BREAK
-#line 1463 "libsexp.yy.c"
+#line 1465 "libsexp.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2452,7 +2454,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 81 "sexp.l"
+#line 84 "sexp.l"
 
 
 

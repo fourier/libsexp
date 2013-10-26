@@ -17,6 +17,7 @@
  */
 %option noyywrap
 
+/* numbers */
 sign                  "+"|"-"
 decimal-point         "."
 exponent-marker       "e"|"E"
@@ -24,14 +25,16 @@ exponent              {exponent-marker}{sign}?[[:digit:]]+
 integer-number        {sign}?[[:digit:]]+
 floating-point-number {sign}?[[:digit:]]*{decimal-point}[[:digit:]]*{exponent}?|{sign}?[[:digit:]]+({decimal-point}[[:digit:]]*)?{exponent}
 
-escape                "\\"
-double-quote          "\""
+/* strings */
+escape                \\
+double-quote          \"
 escaped-double-quote {escape}{double-quote}
-string               {double-quote}([[:graph:]]|[[:space:]]|{escaped-double-quote})*{double-quote}
+string-char          [[:graph:]]{-}["]
+string               {double-quote}({string-char}|[[:space:]]|{escaped-double-quote})*{double-quote}
 
 /* define nil as case insensitive symbol */
 symbol-nil           (?i:nil)
-symbol-initial       [[:alpha:]]|"!"|"$"|"%"|"&"|"*"|"/"|":"|"<"|"="|">"|"?"|"^"|"_"|"~"
+symbol-initial       [[:alpha:]]|"!"|"$"|"%"|"&"|"*"|"/"|":"|"<"|"="|">"|"?"|"^"|"_"|"~"|"'"
 symbol-constituent   {symbol-initial}|[[:digit:]]|"+"|"-"|"."|"@"
 peculiar-symbol      "+"|"-"|"..."
 symbol               {symbol-initial}{symbol-constituent}*|{peculiar-symbol}
@@ -52,7 +55,7 @@ close-paren          ")"
     }
     
 {string}                {
-      yylval.atom = atom_token_string_alloc(yytext,yytext+yyleng);
+      yylval.atom = atom_token_string_alloc(yytext+1,yytext+yyleng-1);
       return ATOM;
     }
 

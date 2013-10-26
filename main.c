@@ -125,7 +125,7 @@ int main(int argc, const char* argv[])
   }
   else
   {
-    parse_file(file);    
+    parse_file(file);
   }
   return 0;
 }
