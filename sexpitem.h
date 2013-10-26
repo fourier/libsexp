@@ -21,7 +21,7 @@
 #ifndef _SEXPITEM_H_
 #define _SEXPITEM_H_
 
-#include "sexptoken.h"
+#include "atomtoken.h"
 
 /* struct representing SEXP item: ATOM or CONS */
 struct sexp_item

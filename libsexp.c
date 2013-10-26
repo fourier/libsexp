@@ -27,7 +27,7 @@
 
 #include "libsexp.h"
 #include "sexpitem.h"
-#include "sexptoken.h"
+#include "atomtoken.h"
 
 int sexp_item_is_atom(sexp_item* item)
 {

@@ -23,7 +23,6 @@
 #include <ctype.h>
 
 #include "sexputils.h"
-#include "sexptoken.h"
 
 static const char whitespaces[] = " \n\r\t";
  

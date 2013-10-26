@@ -8,7 +8,7 @@
    #include <inttypes.h>
    #include <stdio.h>
 
-   #include "sexptoken.h"
+   #include "atomtoken.h"
    #include "libsexp.tab.h"
 }
 

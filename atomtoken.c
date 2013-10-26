@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <ctype.h>
 
-#include "sexptoken.h"
+#include "atomtoken.h"
 
 /*
  * Enum specifying atom-level token types as

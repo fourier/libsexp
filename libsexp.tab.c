@@ -70,7 +70,7 @@
 
 #include <stdio.h>
 
-#include "sexptoken.h"
+#include "atomtoken.h"
 #include "sexpitem.h"
 
 /* error handler */
