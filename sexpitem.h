@@ -24,17 +24,18 @@
 #include "atomtoken.h"
 
 /* struct representing SEXP item: ATOM or CONS */
-struct sexp_item
-{
-  atom_token* atom;             /* if not empty - ATOM */
-  /* otherwise CONS */
-  struct sexp_item* car;
-  struct sexp_item* cdr;
-};
+#ifndef SEXP_ITEM_FWD_DECL
+#define SEXP_ITEM_FWD_DECL
+typedef struct sexp_item sexp_item;
+#endif
 
 
 /* create sexp_item from token, taking ownership of the atom */
 sexp_item* sexp_item_create_atom(atom_token* atom);
 sexp_item* sexp_item_create_cons(sexp_item* car, sexp_item* cdr);
+
+/* get the atom of the sexp item if sexp is atom */
+atom_token* sexp_item_atom(sexp_item* item);
+
 
 #endif /* _SEXPITEM_H_ */

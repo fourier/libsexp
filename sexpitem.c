@@ -21,10 +21,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
+#include <math.h>
 
 #include "sexpitem.h"
 #include "sexpcontainers.h"
 
+struct sexp_item
+{
+  atom_token* atom;             /* if not empty - ATOM */
+  /* otherwise CONS */
+  struct sexp_item* car;
+  struct sexp_item* cdr;
+};
 
 sexp_item* sexp_item_create_atom(atom_token* atom)
 {
@@ -172,3 +181,127 @@ sexp_item* sexp_item_nth(sexp_item* item, int i)
   return result;
 }
 
+int sexp_item_is_atom(sexp_item* item)
+{
+  return item && item->atom;
+}
+
+
+int sexp_item_is_cons(sexp_item* item)
+{
+  return item && item->car;
+}
+
+
+int sexp_item_is_integer(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          atom_token_is_integer(item->atom));
+}
+
+
+int sexp_item_is_float(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          atom_token_is_float(item->atom));
+}
+
+
+int sexp_item_is_string(sexp_item* item)
+{
+  return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          atom_token_is_string(item->atom));
+}
+
+
+int sexp_item_is_symbol(sexp_item* item)
+{
+    return (item &&
+          sexp_item_is_atom(item) &&
+          item->atom &&
+          atom_token_is_symbol(item->atom));
+}
+
+atom_token* sexp_item_atom(sexp_item* item)
+{
+  return sexp_item_is_atom(item) ? item->atom : 0; 
+}
+
+void sexp_item_print(sexp_item* item)
+{
+  if (item && item->atom)
+    atom_token_print(item->atom);
+}
+
+
+int sexp_item_inumber(sexp_item* item)
+{
+  int result = INT_MAX;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      atom_token_is_integer(item->atom))
+    result = atom_token_integer(item->atom);
+  return result;
+}
+
+double sexp_item_fnumber(sexp_item* item)
+{
+  double result = NAN;
+  atom_token* token = 0;
+  if (item &&
+      sexp_item_is_atom(item)
+      && (token = item->atom))
+  {
+    if (atom_token_is_float(token))
+      result = atom_token_float(token);
+    else if(atom_token_is_integer(token))
+      result = (double)atom_token_integer(token);
+  }
+  return result;
+}
+
+const char* sexp_item_string(sexp_item* item)
+{
+  const char* result = 0;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      atom_token_is_string(item->atom))
+    result = atom_token_string(item->atom);
+  return result;
+}
+
+const char* sexp_item_symbol(sexp_item* item)
+{
+  const char* result = 0;
+  if (item &&
+      sexp_item_is_atom(item) &&
+      item->atom &&
+      atom_token_is_symbol(item->atom))
+    result = atom_token_symbol(item->atom);
+  return result;  
+}
+
+
+static void sexp_calc_size(sexp_item* item, void* data)
+{
+  unsigned int* size = (unsigned int*)data;
+  (*size) += sizeof(sexp_item);
+  if (sexp_item_is_atom(item))
+    (*size) += atom_token_size(sexp_item_atom(item));
+}
+
+
+unsigned int sexp_item_size(sexp_item* item)
+{
+  unsigned int size = 0;
+  sexp_item_traverse(item, sexp_calc_size, &size);
+  return size;
+}

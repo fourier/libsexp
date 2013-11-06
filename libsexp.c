@@ -23,115 +23,13 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
-#include <limits.h>
+
 
 #include "libsexp.h"
 #include "sexpitem.h"
 #include "atomtoken.h"
 
-int sexp_item_is_atom(sexp_item* item)
-{
-  return item && item->atom;
-}
 
-
-int sexp_item_is_cons(sexp_item* item)
-{
-  return item && item->car;
-}
-
-
-int sexp_item_is_integer(sexp_item* item)
-{
-  return (item &&
-          sexp_item_is_atom(item) &&
-          item->atom &&
-          atom_token_is_integer(item->atom));
-}
-
-
-int sexp_item_is_float(sexp_item* item)
-{
-  return (item &&
-          sexp_item_is_atom(item) &&
-          item->atom &&
-          atom_token_is_float(item->atom));
-}
-
-
-int sexp_item_is_string(sexp_item* item)
-{
-  return (item &&
-          sexp_item_is_atom(item) &&
-          item->atom &&
-          atom_token_is_string(item->atom));
-}
-
-
-int sexp_item_is_symbol(sexp_item* item)
-{
-    return (item &&
-          sexp_item_is_atom(item) &&
-          item->atom &&
-          atom_token_is_symbol(item->atom));
-}
-
-
-void sexp_item_print(sexp_item* item)
-{
-  if (item && item->atom)
-    atom_token_print(item->atom);
-}
-
-
-int sexp_item_inumber(sexp_item* item)
-{
-  int result = INT_MAX;
-  if (item &&
-      sexp_item_is_atom(item) &&
-      item->atom &&
-      atom_token_is_integer(item->atom))
-    result = atom_token_integer(item->atom);
-  return result;
-}
-
-double sexp_item_fnumber(sexp_item* item)
-{
-  double result = NAN;
-  atom_token* token = 0;
-  if (item &&
-      sexp_item_is_atom(item)
-      && (token = item->atom))
-  {
-    if (atom_token_is_float(token))
-      result = atom_token_float(token);
-    else if(atom_token_is_integer(token))
-      result = (double)atom_token_integer(token);
-  }
-  return result;
-}
-
-const char* sexp_item_string(sexp_item* item)
-{
-  const char* result = 0;
-  if (item &&
-      sexp_item_is_atom(item) &&
-      item->atom &&
-      atom_token_is_string(item->atom))
-    result = atom_token_string(item->atom);
-  return result;
-}
-
-const char* sexp_item_symbol(sexp_item* item)
-{
-  const char* result = 0;
-  if (item &&
-      sexp_item_is_atom(item) &&
-      item->atom &&
-      atom_token_is_symbol(item->atom))
-    result = atom_token_symbol(item->atom);
-  return result;  
-}
 
 
 sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute)
@@ -152,8 +50,8 @@ sexp_item* sexp_item_attribute(sexp_item* item, const char* attribute)
     while(next && !sexp_item_is_nil(next))
     {
       car = sexp_item_car(next);
-      if (car->atom && atom_token_is_symbol(car->atom) &&
-          !strcmp(atom_token_symbol(car->atom),attribute_name))
+      if (sexp_item_is_symbol(car) &&
+          !strcmp(sexp_item_symbol(car),attribute_name))
       {
         result = sexp_item_car(sexp_item_cdr(next));
         break;
@@ -183,12 +81,12 @@ int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
 {
   int result = 0;
   const char* p;
-  if (item && item->atom && atom_token_is_symbol(item->atom))
+  if (item && sexp_item_is_symbol(item))
   {
     result = 1;
     if (symbol)
     {
-      p = atom_token_symbol(item->atom);
+      p = sexp_item_symbol(item);
       while (*p || *symbol)
         if (toupper(*symbol++) != *p++)
           return 0;
@@ -198,18 +96,3 @@ int sexp_item_is_symbol_like(sexp_item* item, const char* symbol)
   return result;
 }
 
-static void sexp_calc_size(sexp_item* item, void* data)
-{
-  unsigned int* size = (unsigned int*)data;
-  (*size) += sizeof(sexp_item);
-  if (sexp_item_is_atom(item))
-    (*size) += atom_token_size(item->atom);
-}
-
-
-unsigned int sexp_item_size(sexp_item* item)
-{
-  unsigned int size = 0;
-  sexp_item_traverse(item, sexp_calc_size, &size);
-  return size;
-}

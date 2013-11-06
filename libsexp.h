@@ -27,7 +27,10 @@
  */
 
 /* forward declaration */
+#ifndef SEXP_ITEM_FWD_DECL
+#define SEXP_ITEM_FWD_DECL
 typedef struct sexp_item sexp_item;
+#endif
 
 /* visitor function used in traverse through Sexp */
 typedef void (*appy_to_item_t) (sexp_item* item, void* data);
@@ -88,6 +91,7 @@ const char* sexp_item_symbol(sexp_item* item);
 sexp_item* sexp_item_free(sexp_item* item);
 sexp_item* sexp_item_car(sexp_item* item);
 sexp_item* sexp_item_cdr(sexp_item* item);
+
 
 /* calculates the length of the list item. -1 if item is not of type list */
 int sexp_item_length(sexp_item* item);
