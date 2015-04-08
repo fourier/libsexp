@@ -1,0 +1,71 @@
+# -*- Mode: tup; -*-
+
+# Copyright (C) 2015 Alexey Veretennikov (alexey dot veretennikov at gmail.com)
+# 
+#	This file is part of Libsexp.
+#
+# Libsexp is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Libsexp is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Libsexp.  If not, see <http://www.gnu.org/licenses/>.
+
+CC = gcc 
+AR = ar
+LEX = flex
+YACC = bison
+CFLAGS = --std=c99 -pedantic -Wall -Wextra -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wdeclaration-after-statement -Wmissing-declarations
+GEN_CFLAGS = 
+
+ifeq (@(RELEASE),0)
+  CFLAGS += -ggdb -pg 
+  GEN_CFLAGS += -ggdb -pg 
+else
+  CFLAGS += -O3 
+  GEN_CFLAGS += -O3
+endif
+
+INCLUDES = -I src -I .
+LINKFLAGS = -L. -lsexp
+OUTPUT = sexptest
+OUTPUT_LIB = libsexp.a
+
+LIBRARY_SRCS = src/*.c
+TEST_SRCS = testsrc/*.c
+
+LEX_HEADER = libsexp.yy.h
+LEX_SOURCE = libsexp.yy.c
+YACC_SOURCE = libsexp.tab.c
+YACC_HEADER = libsexp.tab.h
+
+!cc = |> $(CC) $(CFLAGS) $(INCLUDES) -c %f -o %o |> %B.o
+
+# lex file
+: src/sexp.l |> $(LEX) --header-file=$(LEX_HEADER) -f -o %o %f |> $(LEX_SOURCE) | $(LEX_HEADER) {LEXES}
+
+# yacc file
+: src/sexp.y |> $(YACC) -y --defines=$(YACC_HEADER) -o %o %f |> $(YACC_SOURCE) | $(YACC_HEADER) {YACES}
+
+# compile lex and yacc output sources
+: foreach $(LEX_SOURCE) $(YACC_SOURCE) | $(LEX_HEADER) $(YACC_HEADER) |> $(CC) -c $(GEN_CFLAGS) $(INCLUDES) %f -o %o |> %B.o {GENERATED_OBJECTS}
+
+# library objects
+: foreach $(LIBRARY_SRCS) | $(LEX_HEADER) $(YACC_HEADER) |> !cc |> {LIB_OBJS}
+
+# library binary
+: {LIB_OBJS} {GENERATED_OBJECTS} |> $(AR) cr %o %f ; ranlib %o |> $(OUTPUT_LIB)
+
+# test object
+: foreach $(TEST_SRCS) |> !cc |> {TEST_OBJ}
+
+# test binary
+: {TEST_OBJ} | $(OUTPUT_LIB) |> $(CC) %f -o %o $(LINKFLAGS) |> $(OUTPUT)
+
+
