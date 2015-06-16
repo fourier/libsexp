@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/fourier/libsexp.svg?branch=master)](https://travis-ci.org/fourier/libsexp)
+
 Libsexp
 =======
 Copyright (C) 2011-2013 Alexey Veretennikov (alexey dot veretennikov at gmail dot com)
